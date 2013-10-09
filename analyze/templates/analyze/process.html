@@ -1,0 +1,75 @@
+{% extends "admin/index.html" %}
+{% load i18n grp_tags %}
+
+{% block javascripts %}
+    {{ block.super }}    
+      <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+      <script>
+        google.load('visualization', '1', {packages:['corechart']});
+
+        google.setOnLoadCallback(drawTable);
+        function drawTable() {
+
+          var json_table = new google.visualization.LineChart(document.getElementById('table_div_json'));
+          var json_data = new google.visualization.DataTable({{json}}, 0.6);
+         
+          var options = {
+          title: 'Bias vs. Deviation',
+          hAxis: {title: 'Bias', 
+            //minValue: 0, 
+            //maxValue: 15
+            },
+          vAxis: {title: 'Deviation',
+            // minValue: 0, 
+            //maxValue: 15
+            },
+          series: {
+            0:{color: 'red', 
+              lineWidth: 2, 
+              pointSize: 0, 
+              visibleInLegend: true
+            },
+            1:{color: 'blue', 
+              lineWidth: 0, 
+              pointSize: 3, 
+              visibleInLegend: false
+            }
+          }
+        };
+
+
+
+          json_table.draw(json_data, options);
+        }
+      </script>
+{% endblock %}
+
+
+
+
+<!-- BREADCRUMBS -- >
+{% if not is_popup %}
+    {% block breadcrumbs %}
+        <ul class="grp-horizontal-list">
+            <li><a href="../../">{% trans "Home" %}</a></li>
+            <li><a href="../">{% trans app_label|capfirst|escape %}</a></li>
+            <li>{{ view_label|capfirst }}</li>
+        </ul>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+
+    <H1>Scatterplot</H1>
+    <div id="table_div_json"></div>
+
+    <form method="GET">
+    Upper Tolerance: [mm] <input type="text" name="upper" value={{upper}}><br/>
+    Lower Tolerance: [mm] <input type="text" name="lower" value={{lower}}><br/>
+    <input type="submit" value="Update graph" />
+    </form><br/><br/>
+    
+    <center><pre style="font-family: monospace;">{{ table }}</pre></center>
+{% endblock %}
+
+
