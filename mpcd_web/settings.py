@@ -7,6 +7,8 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+GRAPPELLI_ADMIN_TITLE = 'SQUARE Managed Process Capability Data'
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -98,6 +100,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -123,6 +126,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     'grappelli',
     'django.contrib.admin',
+    'debug_toolbar',
     'tags',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -157,4 +161,10 @@ LOGGING = {
             'propagate': True,
         },
     }
+}
+
+INTERNAL_IPS = ('127.0.0.1','54.229.178.177',)
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS' : False,
 }
