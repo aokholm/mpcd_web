@@ -2,8 +2,8 @@ from django.conf.urls import include, url, patterns
 from django.contrib import admin
 from django.http import HttpResponse
 
-#from mesdata.models import Measurement, MeasurementSet
-#from mesdata.admin import MeasurementSetAdmin
+from mesdata.models import Measurement, MeasurementSet
+from mesdata.admin import MeasurementSetAdmin
 from tags.models import *
 from tags.admin import *
 
@@ -25,7 +25,7 @@ class MyAdminSite(admin.AdminSite):
         
 admin_site = MyAdminSite('myadmin')  
 
-#admin_site.register(MeasurementSet,MeasurementSetAdmin)
+admin_site.register(MeasurementSet,MeasurementSetAdmin)
 
 
 #admin_site.register(MaterialAlternativeName)
