@@ -19,8 +19,12 @@ class MyAdminSite(admin.AdminSite):
 
         my_urls = patterns('',
             #url(r'^(?P<app_name>analyze)/', include('analyze.urls', namespace="analyze")),
+            url(r'^ip$', self.view)
         )
         return my_urls + urls
+
+    def view(self, request):
+        return HttpResponse("IP Address for debug-toolbar: " + request.META['REMOTE_ADDR']) 
 
         
 admin_site = MyAdminSite('myadmin')  
