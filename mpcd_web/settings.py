@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'tags',
     'mesdata',
+    'mptt',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
