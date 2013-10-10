@@ -16,4 +16,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
     url(r'myadmin/', include(admin_site.urls)),
+    url(r'^$', lambda r : HttpResponseRedirect('myadmin/')),
 )
