@@ -169,6 +169,12 @@ LOGGING = {
 
 INTERNAL_IPS = ('127.0.0.1','130.226.161.122','130.225.93.176')
 
+def custom_show_toolbar(request):
+    return True  # Always show toolbar, for example purposes only.
+
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS' : False,
+    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
 }
+
+
