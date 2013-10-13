@@ -13,31 +13,7 @@
           var json_table = new google.visualization.LineChart(document.getElementById('table_div_json'));
           var json_data = new google.visualization.DataTable({{json}}, 0.6);
          
-          var options = {
-          title: 'Bias vs. Deviation',
-          hAxis: {title: 'Bias', 
-            //minValue: 0, 
-            //maxValue: 15
-            },
-          vAxis: {title: 'Deviation',
-            // minValue: 0, 
-            //maxValue: 15
-            },
-          series: {
-            0:{color: 'red', 
-              lineWidth: 2, 
-              pointSize: 0, 
-              visibleInLegend: true
-            },
-            1:{color: 'blue', 
-              lineWidth: 0, 
-              pointSize: 3, 
-              visibleInLegend: false
-            }
-          }
-        };
-
-
+          var options = {{option|safe}};
 
           json_table.draw(json_data, options);
         }
@@ -60,7 +36,7 @@
 
 {% block content %}
 
-    <H1>Scatterplot</H1>
+    <H1>Process Parameters</H1>
     <div id="table_div_json"></div>
 
     <form method="GET">
@@ -71,5 +47,3 @@
     
     <center><pre style="font-family: monospace;">{{ table }}</pre></center>
 {% endblock %}
-
-
