@@ -31,10 +31,7 @@ admin_site = MyAdminSite('myadmin')
 
 admin_site.register(MeasurementSet,MeasurementSetAdmin)
 
-
-#admin_site.register(MaterialAlternativeName)
 admin_site.register(Material, MaterialAdmin)
-#admin_site.register(ProcessAlternativeName)
 admin_site.register(Process, ProcessAdmin)
 admin_site.register(GeneralTag, GeneralTagAdmin)
 admin_site.register(MeasurementEquipment, GeneralTagAdmin)

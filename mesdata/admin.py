@@ -20,6 +20,8 @@ class MeasurementSetAdmin(admin.ModelAdmin):
 
     readonly_fields = ('id',)
     list_display = ('id','measurement_count','measurement_itg','nominal_size','pub_date',)
+    search_fields = ['id','material__name', 'process__name', 'generaltag__name', 'equipment__name']
+    list_filter = ['pub_date', ]
 
     fieldsets = [
         (None,   {
