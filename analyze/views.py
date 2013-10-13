@@ -3,7 +3,7 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 from analyze.charthelper import chartDataJoin
 
-#import numpy as np, math
+import numpy as np, math
 # # import matplotlib.pyplot as plt
 #from prettytable import PrettyTable
 #from scipy.stats import norm, chi2
