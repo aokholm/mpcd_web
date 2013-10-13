@@ -4,14 +4,10 @@ from mesdata.models import MeasurementSet
 from analyze.charthelper import chartDataJoin
 
 import numpy as np, math
-# # import matplotlib.pyplot as plt
 from prettytable import PrettyTable
 from scipy.stats import norm, chi2
-#from lib.ITGrade import ITGrade as itg
 
-#import scipy.stats as ss
-
-#import gviz_api
+from gviz_api import DataTable
 from django.utils.safestring import mark_safe
 
 # Create your views here.
