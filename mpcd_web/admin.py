@@ -18,7 +18,7 @@ class MyAdminSite(admin.AdminSite):
         urls = super(MyAdminSite, self).get_urls()
 
         my_urls = patterns('',
-            #url(r'^(?P<app_name>analyze)/', include('analyze.urls', namespace="analyze")),
+            url(r'^(?P<app_name>analyze)/', include('analyze.urls', namespace="analyze")),
             url(r'^ip$', self.view)
         )
         return my_urls + urls
