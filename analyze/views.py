@@ -7,7 +7,7 @@ import numpy as np, math
 from prettytable import PrettyTable
 from scipy.stats import norm, chi2
 
-from gviz_api import DataTable
+import gviz_api
 from django.utils.safestring import mark_safe
 
 # Create your views here.
