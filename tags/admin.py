@@ -11,7 +11,7 @@ class AlternativeMaterialAdmin(admin.TabularInline):
     model = MaterialAlternativeName
 
 class MaterialAdmin(MPTTModelAdmin):
-    list_display = ['name', 'alternative_names_']
+    list_display = ['name', 'alternative_names_',]
     search_fields = ['name', 'material_names__name',]
 
     def queryset(self, request):

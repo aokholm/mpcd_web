@@ -28,7 +28,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
             'classes': ('grp-collapse grp-open',),
             'fields': ['nominal_size','material','process','equipment','generaltag','measurement_type','tol_up','tol_low','pub_date' ]
         }),
-        ('Confidential information', {
+        ('Additional information', {
             'classes': ('grp-collapse grp-open',),
             'fields': ['price','weight','manufac','measured','machine','pro_yield']
         }),

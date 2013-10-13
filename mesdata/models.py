@@ -22,18 +22,18 @@ class MeasurementSet(models.Model):
     nominal_size = models.FloatField('Nominal Size')
     tol_up = models.FloatField('Upper tolerance',blank=True, null=True) 
     tol_low = models.FloatField('Lower tolerance',blank=True, null=True)  
-    price = models.FloatField('Price',blank=True, null=True) 
-    weight = models.FloatField('Weight',blank=True, null=True)
-    manufac = models.CharField(max_length=200,blank=True, null=True)
-    measured = models.CharField(max_length=200,blank=True, null=True)
-    machine = models.CharField(max_length=200,blank=True, null=True)
-    pro_yield = models.CharField(max_length=200,blank=True, null=True)
-    pub_date = models.DateTimeField('date published',default=datetime.now, blank=False)
+    price = models.FloatField('Price per 1000 [$]',blank=True, null=True) 
+    weight = models.FloatField('Weight of product [kg]',blank=True, null=True)
+    manufac = models.CharField('Manufacturer',max_length=200,blank=True, null=True)
+    measured = models.CharField('Measured by whom',max_length=200,blank=True, null=True)
+    machine = models.CharField('Which Machine',max_length=200,blank=True, null=True)
+    pro_yield = models.CharField('Production yield',max_length=200,blank=True, null=True)
+    pub_date = models.DateTimeField('Date Published',default=datetime.now, blank=False)
 
     material = models.ForeignKey('tags.Material', related_name='measurement_sets')
     material.allow_tags = True
     process = models.ForeignKey('tags.Process',related_name='measurement_sets')
-    generaltag = models.ManyToManyField('tags.GeneralTag',related_name='measurement_sets',blank=True,null=True)
+    generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_sets',blank=True,null=True)
     equipment = models.ForeignKey('tags.MeasurementEquipment',related_name='measurement_sets')
 
     ANGLE = 'A'
