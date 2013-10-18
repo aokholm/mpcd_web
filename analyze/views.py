@@ -75,6 +75,44 @@ def design(request, app_name):
     # Creating a JSon string
     json = data_table.ToJSon()
 
+    option = {
+        'title': 'Line of Best Fit(Trend Line)',
+        'hAxis': {
+            'title': 'IT grade',     
+        },
+        'vAxis': {
+            'title': 'Cumilative frequency',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'red',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+            2: {
+                'lineWidth': 1,
+                'pointSize': 0,
+                'color': 'blue',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+            3: {
+                'lineWidth': 1,
+                'pointSize': 0,
+                'color': 'blue',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            }
+        },
+    }
 
     return render(request, 'analyze/design.html', 
         {
@@ -84,6 +122,7 @@ def design(request, app_name):
             'measurement_sets': measurements_sets,
             'table' : mytable,
             'json' : mark_safe(json),
+            'option' : option
 
         })
 

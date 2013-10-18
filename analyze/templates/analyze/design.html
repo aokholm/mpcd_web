@@ -11,49 +11,7 @@
         function drawTable() {
             var json_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_json'));
             var json_data = new google.visualization.DataTable({{json}}, 0.6);
-            var options = {
-                    title: 'Line of Best Fit(Trend Line)',
-                hAxis: {
-                    title: 'IT grade',
-                    // minValue: 0,
-                    // maxValue: 15
-                },
-                vAxis: {
-                    title: 'Cumilative frequency',
-                    // minValue: 0,
-                    // maxValue: 15
-                },
-                legend: 'none',
-                series: {
-                    // series 0 is the Scatter
-                    0: {
-                        // you can omit this if you choose not to set any options for this series
-                    },
-                    // series 1 is the Line
-                    1: {
-                        lineWidth: 2,
-                        pointSize: 0,
-                        color: 'red',
-                        enableInteractivity: false,
-                        tooltip: 'none'
-                    },
-                    2: {
-                        lineWidth: 1,
-                        pointSize: 0,
-                        color: 'blue',
-                        enableInteractivity: false,
-                        tooltip: 'none'
-                    },
-                    3: {
-                        lineWidth: 1,
-                        pointSize: 0,
-                        color: 'blue',
-                        enableInteractivity: false,
-                        tooltip: 'none'
-                    }
-                },
-                // colors: ['blue', 'red', 'blue', 'blue']
-            };
+            var options = {{option|safe}};
 
             json_chart.draw(json_data, options);
         }
