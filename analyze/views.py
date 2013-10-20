@@ -1,6 +1,7 @@
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from mesdata.models import MeasurementSet
+from mesdata.ITGrade import itg2tol
 from analyze.charthelper import chartDataJoin
 
 import numpy as np, math
@@ -23,7 +24,22 @@ def design(request, app_name):
     measurements_sets = MeasurementSet.objects.all().prefetch_related('process', 'material')
 
     itgrades = sorted([messet.measurement_itg for messet in measurements_sets])
-    input_data = itgrades
+
+    nominalsize = ""
+    if request.GET.get('nominalsize'):
+        nominalsize = float(request.GET.get('nominalsize'))
+
+    if nominalsize == "":
+        micro_nomsize = 0
+        input_data = itgrades
+    else:
+        micro_nomsize = 1
+        # Change to tolerance
+        input_data = []
+        for x in range(len(itgrades)):
+            input_data.append(itg2tol(nominalsize,itgrades[x]))
+    
+    
     Ndata = len(input_data)
     number = [i for i in range(1,Ndata+1)]
     cum_rank =[i*(1/float(Ndata+1)) for i in range(1, Ndata+1)]
@@ -61,25 +77,45 @@ def design(request, app_name):
     # description = [('x_value', 'number'), ('cum_rank', 'number', 'Cum. ITG.'), ('cdf', 'number'), ('cdfll', 'number'), ('cdful', 'number')]
     # chardata = chartDataJoin([input_data, x, x, x],[cum_rank, cdf, cdfll, cdful])
     
+    description = {
+        "x_value": ("number" , "x_value" ),
+        "cum_rank": ("number" , "Cum. ITG."),
+        "cdf" : ("number", "cdf"),
+        "cdfll" : ("number", "cdfll"),
+        "cdful" : ("number", "cdful"),
+        "tooltip" : ("string","Tip1",{"role":"tooltip"})
+    }
 
-    description = [('x_value', 'number'), ('cum_rank', 'number', 'Cum. ITG.'), ('cdf', 'number'), ('cdfll', 'number'), ('cdful', 'number'), ("tooltip","String","tooltip",{"role":"tooltip"})]
-    chardata = chartDataJoin([input_data, x, x, x],[cum_rank, cdf, cdfll, cdful])
-    [chardata[i].append(None) for i in range(len(chardata))]
+    data = []
 
-    data = chardata
+    for i in range(len(input_data)):
+        data.append({
+            "x_value": input_data[i],
+            "cum_rank": cum_rank[i]
+            })
+
+    for i in range(len(x)):
+        data.append({
+            "x_value": x[i],
+            "cdf": cdf[i],
+            "cdfll": cdfll[i],
+            "cdful": cdful[i]
+            })
+
+    #chardata = chartDataJoin([input_data, x, x, x],[cum_rank, cdf, cdfll, cdful])
+    #[chardata[i].append(None) for i in range(len(chardata))]
+
+    #data = chardata
 
     # Loading it into gviz_api.DataTable
     data_table = gviz_api.DataTable(description)
     data_table.LoadData(data)
 
     # Creating a JSon string
-    json = data_table.ToJSon()
+    json = data_table.ToJSon(columns_order=("x_value","cum_rank","cdf","cdfll","cdful","tooltip"))
 
     option = {
         'title': 'Line of Best Fit(Trend Line)',
-        'hAxis': {
-            'title': 'IT grade',     
-        },
         'vAxis': {
             'title': 'Cumilative frequency',
         },
@@ -114,6 +150,19 @@ def design(request, app_name):
         },
     }
 
+    if micro_nomsize == 1:
+        option.update({
+            'hAxis': {
+                'title': 'Symmetric tolerance [mm]'      
+            }
+        })
+    else:
+        option.update({
+            'hAxis': {
+                'title': 'IT grade',     
+            }
+        })
+
     return render(request, 'analyze/design.html', 
         {
             'app_label': app_name,
@@ -122,7 +171,8 @@ def design(request, app_name):
             'measurement_sets': measurements_sets,
             'table' : mytable,
             'json' : mark_safe(json),
-            'option' : option
+            'option' : option,
+            'nominalsize' : nominalsize
 
         })
 

@@ -34,6 +34,12 @@
    <div class="g-d-c">
          <H1>Tolerance Selection</H1>
         <div id="chart_div_json"></div>
+
+        <form method="GET">
+        Nominal size [mm]: <input type="text" name="nominalsize" value={{nominalsize}}><br/>
+        <input type="submit" value="Update graph" />
+        </form><br/><br/>
+
         <pre style="font-family: monospace;">{{ table }}</pre>
         <br />
         {% for measurements_set in measurement_sets%}
