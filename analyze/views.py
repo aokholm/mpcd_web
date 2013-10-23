@@ -80,10 +80,10 @@ def design(request, app_name):
     description = {
         "x_value": ("number" , "x_value" ),
         "cum_rank": ("number" , "Cum. ITG."),
+        "tooltip" : ("string","Tip1",{"role":"tooltip"}),
         "cdf" : ("number", "cdf"),
         "cdfll" : ("number", "cdfll"),
-        "cdful" : ("number", "cdful"),
-        "tooltip" : ("string","Tip1",{"role":"tooltip"})
+        "cdful" : ("number", "cdful")    
     }
 
     data = []
@@ -91,7 +91,8 @@ def design(request, app_name):
     for i in range(len(input_data)):
         data.append({
             "x_value": input_data[i],
-            "cum_rank": cum_rank[i]
+            "cum_rank": cum_rank[i],
+            "tooltip": ("data from No. %s" % number[i])
             })
 
     for i in range(len(x)):
@@ -112,7 +113,7 @@ def design(request, app_name):
     data_table.LoadData(data)
 
     # Creating a JSon string
-    json = data_table.ToJSon(columns_order=("x_value","cum_rank","cdf","cdfll","cdful","tooltip"))
+    json = data_table.ToJSon(columns_order=("x_value","cum_rank","tooltip","cdf","cdfll","cdful"))
 
     option = {
         'title': 'Line of Best Fit(Trend Line)',
