@@ -9,7 +9,7 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-GRAPPELLI_ADMIN_TITLE = 'SQUARE Managed Process Capability Data'
+GRAPPELLI_ADMIN_TITLE = 'SQUARE Process Capability Data Management'
 
 MANAGERS = ADMINS
 
