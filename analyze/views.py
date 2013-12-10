@@ -1,7 +1,7 @@
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from mesdata.models import MeasurementSet
-from mesdata.ITGrade import itg2tol
+from mesdata.PCfunctions import dimItg2Symtol
 from analyze.charthelper import chartDataJoin
 
 import numpy as np, math
@@ -45,7 +45,7 @@ def design(request, app_name):
         # Change to tolerance
         input_data = []
         for x in range(len(itgrades)):
-            input_data.append(itg2tol(nominalsize,itgrades[x]))
+            input_data.append(dimItg2Symtol(nominalsize,itgrades[x]))
     
     
     Ndata = len(input_data)
