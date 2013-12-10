@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     # ex: /analyze/process/
     url(r'^process/', admin_site.admin_view(views.process), name='process'),
     url(r'^design/', admin_site.admin_view(views.design), name='design'),
+    url(r'^plots/', admin_site.admin_view(views.plots),name='plots')
     # # ex: /polls/5/
     # url(r'^(?P<pk>\d+)/$', views.DetailView.as_view(), name='detail'),
     # # ex: /polls/5/results/
