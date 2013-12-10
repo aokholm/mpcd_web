@@ -1,6 +1,6 @@
 from django.contrib import admin
 from mesdata.models import Measurement, MeasurementSet
-from mesdata.ITGrade import stdbias2itg
+from mesdata.PCfunctions import dimStdMeanshiftCpk2Itg
 from numpy import mean, std
 
 
@@ -55,6 +55,6 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         obj.cpk = 1.66
         obj.mean_shift = nominal_size - mean(measurements)
         obj.std = std(measurements) # Should implement correction factor
-        obj.itg = stdbias2itg(nominal_size, obj.std, obj.mean_shift, obj.cpk)
+        obj.itg = dimStdMeanshiftCpk2Itg(nominal_size, obj.std, obj.mean_shift, obj.cpk)
         obj.save()
         return obj
