@@ -19,11 +19,19 @@ def index(request, app_name):
 
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
+def plots(request, app_name):
+    app_dict = {
+        'name': app_name,
+    }
+
+    return render(request, 'analyze/plots.html', {'app_list': [app_dict],})
+
+
 
 def design(request, app_name):
     measurements_sets = MeasurementSet.objects.all().prefetch_related('process', 'material')
 
-    itgrades = sorted([messet.measurement_itg for messet in measurements_sets])
+    itgrades = sorted([messet.itg for messet in measurements_sets])
 
     nominalsize = ""
     if request.GET.get('nominalsize'):
@@ -190,8 +198,8 @@ def process(request, app_name):
     toly = [0, (upper - lower)/6, 0]
     tol_label = ["Bla1","bla2","bla3"]
 
-    bias = [messet.measurement_bias for messet in measurements_sets]
-    dev = [messet.measurement_std for messet in measurements_sets]
+    bias = [messet.mean_shift for messet in measurements_sets]
+    dev = [messet.std for messet in measurements_sets]
     id_set = [messet.id for messet in measurements_sets]
 
     # Creating the data
@@ -226,8 +234,8 @@ def process(request, app_name):
     # Creating a JSon string
     json = data_table.ToJSon(columns_order=("Bias","Cpk","Cpk_tool","Deviation","Deviation_tool"))
 
-    count = [messet.measurement_count for messet in measurements_sets]
-    itg = [messet.measurement_itg for messet in measurements_sets]
+    count = [messet.count for messet in measurements_sets]
+    itg = [messet.itg for messet in measurements_sets]
    
     option = {
         'title': 'Bias vs. Deviation',
