@@ -1,7 +1,7 @@
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from mesdata.models import MeasurementSet
-from mesdata.PCfunctions import dimItg2Symtol
+import mesdata.PCfunctions as pc
 from analyze.charthelper import chartDataJoin
 
 import numpy as np, math
@@ -25,7 +25,9 @@ def plots(request, app_name):
     id_set = [messet.id for messet in measurements_sets]
     itgrade = [messet.itg for messet in measurements_sets]
     itgrade_spec = [messet.itg_spec for messet in measurements_sets]
+    cp = [messet.cp for messet in measurements_sets]
 
+    # FIRST PLOT - ITG vs. ITG SPEC
     description1 = {
     "itgrade": ("number" , "IT Grade"),
     "itgrade_spec": ("number" , "specified IT Grade"),
@@ -80,12 +82,135 @@ def plots(request, app_name):
         },
     }
 
+
+    # SECOND PLOT - ITG ALL
+    description2 = {
+    "itgrade": ("number" , "cp"),
+    "cum_freq": ("number" , "cumulative frequency"),
+    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
+    "best_fit" : ("number", "best fit")
+    }
+
+    data2 =[]
+
+    yvalue = np.linspace(0,1, len(itgrade)).tolist()
+    sorted_itgrade, sorted_id = zip(*sorted(zip(itgrade,id_set)))
+
+    for i in range(len(id_set)):
+        data2.append({
+            "itgrade": sorted_itgrade[i],
+            "cum_freq": yvalue[i],
+            "tooltip": ("data from No. %s" % sorted_id[i])
+                })
+
+    [xvalue , cdfvalue] = pc.list2cdf (itgrade)
+
+    for i in range(len(xvalue)):
+        data2.append({
+            "itgrade": xvalue[i],
+            "best_fit": cdfvalue[i],
+            })
+
+    data_table2 = gviz_api.DataTable(description2)
+    data_table2.LoadData(data2)
+
+    json2 = data_table2.ToJSon(columns_order=("itgrade","cum_freq","tooltip","best_fit"))
+
+    option2 = {
+        'title': 'Acumulated frequency of IT grade for all data',
+        'vAxis': {
+            'title': 'Probability',
+        },
+        'hAxis': {
+            'title': 'Tolerance (IT grade)',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'red',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+        },
+    }
+
+# Third PLOT - CP ALL
+    description3 = {
+    "cp": ("number" , "cp"),
+    "cum_freq": ("number" , "cumulative frequency"),
+    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
+    "best_fit" : ("number", "best fit")
+    }
+
+    data3 =[]
+
+    yvalue = np.linspace(0,1, len(cp)).tolist()
+    sorted_cp, sorted_id = zip(*sorted(zip(cp,id_set)))
+
+    for i in range(len(id_set)):
+        data3.append({
+            "cp": sorted_cp[i],
+            "cum_freq": yvalue[i],
+            "tooltip": ("data from No. %s" % sorted_id[i])
+                })
+
+    [xvalue , cdfvalue] = pc.list2cdf(cp)
+
+    for i in range(len(xvalue)):
+        data3.append({
+            "cp": xvalue[i],
+            "best_fit": cdfvalue[i],
+            })
+
+    data_table3 = gviz_api.DataTable(description3)
+    data_table3.LoadData(data3)
+
+    json3 = data_table3.ToJSon(columns_order=("cp","cum_freq","tooltip","best_fit"))
+
+    option3 = {
+        'title': 'Acumulated frequency of Cp for all data',
+        'vAxis': {
+            'title': 'Probability',
+        },
+        'hAxis': {
+            'title': 'Cp process variance',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'red',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+        },
+    }
+
+
     return render(request, 'analyze/plots.html', 
         {
         'app_label': app_name,
         'view_label': 'lots og plot',
         'json1' : mark_safe(json1),
         'option1' : option1,
+        'json2' : mark_safe(json2),
+        'option2' : option2,
+        'json3' : mark_safe(json3),
+        'option3' : option3,
+
         })
 
 
@@ -107,7 +232,7 @@ def design(request, app_name):
         # Change to tolerance
         input_data = []
         for x in range(len(itgrades)):
-            input_data.append(dimItg2Symtol(nominalsize,itgrades[x]))
+            input_data.append(pc.dimItg2Symtol(nominalsize,itgrades[x]))
     
     
     Ndata = len(input_data)

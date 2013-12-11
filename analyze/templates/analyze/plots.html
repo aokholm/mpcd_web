@@ -12,9 +12,25 @@
         function drawTable() {
             var itg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_itg'));
             var itg_data = new google.visualization.DataTable({{json1}}, 0.6);
-            var options = {{option1|safe}};
+            var itg_options = {{option1|safe}};
 
-            itg_chart.draw(itg_data, options);
+            itg_chart.draw(itg_data, itg_options);
+        }
+        google.setOnLoadCallback(drawTable2);
+        function drawTable2() {
+            var totalitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_totalitg'));
+            var totalitg_data = new google.visualization.DataTable({{json2}}, 0.6);
+            var totalitg_options = {{option2|safe}};
+
+            totalitg_chart.draw(totalitg_data, totalitg_options);
+        }
+        google.setOnLoadCallback(drawTable3);
+        function drawTable3() {
+            var totalcp_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_totalcp'));
+            var totalcp_data = new google.visualization.DataTable({{json3}}, 0.6);
+            var totalcp_options = {{option3|safe}};
+
+            totalcp_chart.draw(totalcp_data, totalcp_options);
         }
     </script>
 {% endblock %}
@@ -35,5 +51,8 @@
 <div class="g-d-c">
     <h1> Hello world </h1>
     <div id="chart_div_itg"></div>
+    <div id="chart_div_totalitg"></div>
+    <div id="chart_div_totalcp"></div>
 </div>
+
 {% endblock %}
