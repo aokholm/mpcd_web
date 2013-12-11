@@ -20,11 +20,14 @@ def index(request, app_name):
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
 def plots(request, app_name):
-    app_dict = {
-        'name': app_name,
-    }
+    measurements_sets = MeasurementSet.objects.all()
 
-    return render(request, 'analyze/plots.html', {'app_list': [app_dict],})
+
+
+    return render(request, 'analyze/plots.html', 
+        {
+        'app_label': app_name,
+        })
 
 
 

@@ -38,3 +38,11 @@ def dimStdMeanshiftCpk2Itg(dim,std,meanshift,cpk):
 	itg = dimSymtol2Itg(dim,symtol)
 
 	return itg
+
+def upperLowerTol2SymTol(upper, lower):
+	
+	# Calculates symmetric tolerance width
+
+	tol_spec = (upper-lower)/2.0
+
+	return tol_spec
