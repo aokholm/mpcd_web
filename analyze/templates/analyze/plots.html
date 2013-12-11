@@ -4,6 +4,19 @@
 
 {% block javascripts %}
     {{ block.super }}
+    <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    <script>
+        google.load('visualization', '1', {packages:['corechart']});
+
+        google.setOnLoadCallback(drawTable);
+        function drawTable() {
+            var itg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_itg'));
+            var itg_data = new google.visualization.DataTable({{json1}}, 0.6);
+            var options = {{option1|safe}};
+
+            itg_chart.draw(itg_data, options);
+        }
+    </script>
 {% endblock %}
 
 <!-- BREADCRUMBS -- >
@@ -19,6 +32,8 @@
 
 
 {% block content %}
-
-<h1> Hello world </h1>
+<div class="g-d-c">
+    <h1> Hello world </h1>
+    <div id="chart_div_itg"></div>
+</div>
 {% endblock %}

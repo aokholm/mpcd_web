@@ -22,11 +22,70 @@ def index(request, app_name):
 def plots(request, app_name):
     measurements_sets = MeasurementSet.objects.all()
 
+    id_set = [messet.id for messet in measurements_sets]
+    itgrade = [messet.itg for messet in measurements_sets]
+    itgrade_spec = [messet.itg_spec for messet in measurements_sets]
 
+    description1 = {
+    "itgrade": ("number" , "IT Grade"),
+    "itgrade_spec": ("number" , "specified IT Grade"),
+    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
+    "xyline" : ("number", "Helper line"),
+    }
+
+    data1 =[]
+
+    for i in range(len(id_set)):
+        data1.append({
+            "itgrade": itgrade[i],
+            "itgrade_spec": itgrade_spec[i],
+            "tooltip": ("data from No. %s" % id_set[i])
+                })
+
+    xline = [min(itgrade) , max(itgrade)]
+
+    for i in range(2):
+        data1.append({
+            "itgrade": xline[i],
+            "xyline": xline[i],
+            })
+
+    data_table1 = gviz_api.DataTable(description1)
+    data_table1.LoadData(data1)
+
+    json1 = data_table1.ToJSon(columns_order=("itgrade","itgrade_spec","tooltip"))
+
+    option1 = {
+        'title': 'Actual tolerance (IT grade) as a function of specified tolerance (IT grade)',
+        'vAxis': {
+            'title': 'Specified IT grade',
+        },
+        'hAxis': {
+            'title': 'Actual IT grade',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'red',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+        },
+    }
 
     return render(request, 'analyze/plots.html', 
         {
         'app_label': app_name,
+        'view_label': 'lots og plot',
+        'json1' : mark_safe(json1),
+        'option1' : option1,
         })
 
 
@@ -199,7 +258,6 @@ def process(request, app_name):
 
     tolx = [lower, (upper+lower)/2 , upper]
     toly = [0, (upper - lower)/6, 0]
-    tol_label = ["Bla1","bla2","bla3"]
 
     bias = [messet.mean_shift for messet in measurements_sets]
     dev = [messet.std for messet in measurements_sets]
