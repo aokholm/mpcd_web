@@ -30,16 +30,6 @@ def stdMeanshiftCpk2Symtol(std,meanshift, cpk):
 	symtol = abs(meanshift) + 3 * std * cpk
 	return symtol
 
-def dimStdMeanshiftCpk2Itg(dim,std,meanshift,cpk):
-
-	# Calculates a IT grade from meanshift, standard deviation and cpk-value
-
-	symtol = stdMeanshiftCpk2Symtol(std,meanshift,cpk)
-
-	itg = dimSymtol2Itg(dim,symtol)
-
-	return itg
-
 def UslLsl2SymTol(USL, LSL):
 	
 	# Calculates symmetric tolerance width

@@ -3,7 +3,6 @@ from mesdata.models import Measurement
 from mesdata.PCfunctions import stdMeanshiftCpk2Symtol, UslLsl2SymTol, c4stdCorrectionFactor, dimSymtol2Itg
 from numpy import mean, std
 
-
 # admin MEASUREMENT
 class MeasurementInline(admin.TabularInline):
     classes = ('grp-collapse grp-open',)
