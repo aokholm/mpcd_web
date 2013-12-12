@@ -3,13 +3,16 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 import mesdata.PCfunctions as pc
 from analyze.charthelper import chartDataJoin
-
+from django.db.models import Q
 import numpy as np, math
 from prettytable import PrettyTable
 from scipy.stats import norm, chi2
 
 import gviz_api
 from django.utils.safestring import mark_safe
+
+from tags.models import GeneralTag
+from numpy.numarray.alter_code1 import setshape_re
 
 # Create your views here.
 def index(request, app_name):
@@ -165,13 +168,13 @@ def plots(request, app_name):
             "tooltip": ("data from No. %s" % sorted_id[i])
                 })
 
-    [xvalue , cdfvalue] = pc.list2cdf(cp)
+    #[xvalue , cdfvalue] = pc.list2cdf(cp)
 
-    for i in range(len(xvalue)):
-        data3.append({
-            "cp": xvalue[i],
-            "best_fit": cdfvalue[i],
-            })
+    #    for i in range(len(xvalue)):
+    #    data3.append({
+    #        "cp": xvalue[i],
+    #        "best_fit": cdfvalue[i],
+    #        })
 
     data_table3 = gviz_api.DataTable(description3)
     data_table3.LoadData(data3)
@@ -193,29 +196,27 @@ def plots(request, app_name):
             # you can omit this if you choose not to set any options for this series
             },
             # series 1 is the Line
-            1: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'red',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
+            #1: {
+            #    'lineWidth': 2,
+            #    'pointSize': 0,
+            #    'color': 'red',
+            #    'enableInteractivity': 'false',
+            #    'tooltip': 'none'
+            #},
         },
     }
 
     # Fourth plot - sorting ITG for diameter
-
-    lst_diameter = []
-    lst_other = []
-    id1 = []
-    id2 = []
-    for i in range(len(itgrade)):
-        if specification_type[i] == 'DI':
-            lst_diameter.append(itgrade[i])
-            id1.append(id_set[i])
-        else:
-            lst_other.append(itgrade[i])
-            id2.append(id_set[i])
+    
+    
+    
+    diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
+    notdiMeasurements = MeasurementSet.objects.filter(~Q(specification_type='DI'))
+    
+    lst_diameter = [messet.itg for messet in diMeasurements]
+    id1 = [messet.id for messet in diMeasurements]
+    lst_other = [messet.itg for messet in notdiMeasurements]
+    id2 = [messet.id for messet in notdiMeasurements]
 
     description4 = {
     "itg": ("number" , "IT grade"),
@@ -304,7 +305,107 @@ def plots(request, app_name):
         },
     }
 
+    # fifth plot - sorting first run
+    
+    FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
+    
+    FirstRunQuerySet = MeasurementSet.objects.filter(generaltag__in = [FirstRunGeneralTag]).distinct()
+    notFirstRunQuerySet = MeasurementSet.objects.filter(~Q(generaltag__in = [FirstRunGeneralTag])).distinct()
+    
+    lst_firstRunItg = [sets.itg for sets in FirstRunQuerySet]
+    lst_otherItg = [sets.itg for sets in notFirstRunQuerySet]
+    lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
+    lst_otherid = [sets.id for sets in notFirstRunQuerySet]
+    
+    description5 = {
+    "itg": ("number" , "IT grade"),
+    "cum_freq1": ("number" , "cumulative frequency"),
+    "tooltip1" : ("string","Tip1",{"role":"tooltip"}),
+    "best_fit1" : ("number", "best fit"),
+    "cum_freq2": ("number" , "cumulative frequency"),
+    "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
+    "best_fit2" : ("number", "best fit")
+    }
 
+    data5 =[]
+
+    yvalue1 = np.linspace(0,1, len(lst_firstRunItg)).tolist()
+    sorted_itg1, sorted_id1 = zip(*sorted(zip(lst_firstRunItg,lst_firstRunId)))
+
+    yvalue2 = np.linspace(0,1, len(lst_otherItg)).tolist()
+    sorted_itg2, sorted_id2 = zip(*sorted(zip(lst_otherItg,lst_otherid)))
+
+    for i in range(len(sorted_id1)):
+        data5.append({
+            "itg": sorted_itg1[i],
+            "cum_freq1": yvalue1[i],
+            "tooltip1": ("data from No. %s" % sorted_id1[i])
+                })
+    for i in range(len(sorted_id2)):
+        data5.append({
+            "itg": sorted_itg2[i],
+            "cum_freq2": yvalue2[i],
+            "tooltip2": ("data from No. %s" % sorted_id2[i])
+                })
+
+    [xvalue1 , cdfvalue1] = pc.list2cdf(lst_firstRunItg)
+    [xvalue2 , cdfvalue2] = pc.list2cdf(lst_otherItg)
+
+    for i in range(len(xvalue1)):
+        data5.append({
+            "itg": xvalue1[i],
+            "best_fit1": cdfvalue1[i],
+            })
+
+    for i in range(len(xvalue2)):
+        data5.append({
+            "itg": xvalue2[i],
+            "best_fit2": cdfvalue2[i],
+            })
+
+    data_table5 = gviz_api.DataTable(description5)
+    data_table5.LoadData(data5)
+
+    json5 = data_table5.ToJSon(columns_order=("itg","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
+
+    option5 = {
+        'title': 'comparison of acumulated frequency of first production run vs.  all data',
+        'vAxis': {
+            'title': 'Probability',
+        },
+        'hAxis': {
+            'title': 'tolerance (IT Grade)',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'blue',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+            2: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            3: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'orange',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+        },
+    }
+                
+            
+            
 
 
     return render(request, 'analyze/plots.html', 
@@ -319,6 +420,8 @@ def plots(request, app_name):
         'option3' : option3,
         'json4' : mark_safe(json4),
         'option4' : option4,
+        'json5' : mark_safe(json5),
+        'option5' : option5,
         })
 
 
