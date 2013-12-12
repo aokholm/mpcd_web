@@ -27,6 +27,10 @@ def plots(request, app_name):
     itgrade_spec = [messet.itg for messet in measurements_sets]
     cp = [messet.cp for messet in measurements_sets]
 
+    material = [messet.material.name for messet in measurements_sets]
+    specification_type = [messet.specification_type for messet in measurements_sets]
+
+
     # FIRST PLOT - ITG vs. ITG SPEC
     description1 = {
     "itgrade": ("number" , "IT Grade"),
@@ -44,7 +48,7 @@ def plots(request, app_name):
             "tooltip": ("data from No. %s" % id_set[i])
                 })
 
-    xline = [min(itgrade) , max(itgrade)]
+    xline = [10 , 15]
 
     for i in range(2):
         data1.append({
@@ -55,7 +59,7 @@ def plots(request, app_name):
     data_table1 = gviz_api.DataTable(description1)
     data_table1.LoadData(data1)
 
-    json1 = data_table1.ToJSon(columns_order=("itgrade","itgrade_spec","tooltip"))
+    json1 = data_table1.ToJSon(columns_order=("itgrade","itgrade_spec","tooltip","xyline"))
 
     option1 = {
         'title': 'Actual tolerance (IT grade) as a function of specified tolerance (IT grade)',
@@ -199,6 +203,109 @@ def plots(request, app_name):
         },
     }
 
+    # Fourth plot - sorting ITG for diameter
+
+    lst_diameter = []
+    lst_other = []
+    id1 = []
+    id2 = []
+    for i in range(len(itgrade)):
+        if specification_type[i] == 'DI':
+            lst_diameter.append(itgrade[i])
+            id1.append(id_set[i])
+        else:
+            lst_other.append(itgrade[i])
+            id2.append(id_set[i])
+
+    description4 = {
+    "itg": ("number" , "IT grade"),
+    "cum_freq1": ("number" , "cumulative frequency"),
+    "tooltip1" : ("string","Tip1",{"role":"tooltip"}),
+    "best_fit1" : ("number", "best fit"),
+    "cum_freq2": ("number" , "cumulative frequency"),
+    "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
+    "best_fit2" : ("number", "best fit")
+    }
+
+    data4 =[]
+
+    yvalue1 = np.linspace(0,1, len(lst_diameter)).tolist()
+    sorted_itg1, sorted_id1 = zip(*sorted(zip(lst_diameter,id1)))
+
+    yvalue2 = np.linspace(0,1, len(lst_other)).tolist()
+    sorted_itg2, sorted_id2 = zip(*sorted(zip(lst_other,id2)))
+
+    for i in range(len(sorted_id1)):
+        data4.append({
+            "itg": sorted_itg1[i],
+            "cum_freq1": yvalue1[i],
+            "tooltip1": ("data from No. %s" % sorted_id1[i])
+                })
+    for i in range(len(sorted_id2)):
+        data4.append({
+            "itg": sorted_itg2[i],
+            "cum_freq2": yvalue2[i],
+            "tooltip2": ("data from No. %s" % sorted_id2[i])
+                })
+
+    [xvalue1 , cdfvalue1] = pc.list2cdf(lst_diameter)
+    [xvalue2 , cdfvalue2] = pc.list2cdf(lst_other)
+
+    for i in range(len(xvalue1)):
+        data4.append({
+            "itg": xvalue1[i],
+            "best_fit1": cdfvalue1[i],
+            })
+
+    for i in range(len(xvalue2)):
+        data4.append({
+            "itg": xvalue2[i],
+            "best_fit2": cdfvalue2[i],
+            })
+
+    data_table4 = gviz_api.DataTable(description4)
+    data_table4.LoadData(data4)
+
+    json4 = data_table4.ToJSon(columns_order=("itg","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
+
+    option4 = {
+        'title': 'comparison of acumulated frequency of diameter vs.  all data',
+        'vAxis': {
+            'title': 'Probability',
+        },
+        'hAxis': {
+            'title': 'tolerance (IT Grade)',
+        },
+        'legend': 'none',
+        'series': {
+            # series 0 is the Scatter
+            0: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            1: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'blue',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+            2: {
+            # you can omit this if you choose not to set any options for this series
+            },
+            # series 1 is the Line
+            3: {
+                'lineWidth': 2,
+                'pointSize': 0,
+                'color': 'orange',
+                'enableInteractivity': 'false',
+                'tooltip': 'none'
+            },
+        },
+    }
+
+
+
 
     return render(request, 'analyze/plots.html', 
         {
@@ -210,7 +317,8 @@ def plots(request, app_name):
         'option2' : option2,
         'json3' : mark_safe(json3),
         'option3' : option3,
-
+        'json4' : mark_safe(json4),
+        'option4' : option4,
         })
 
 
