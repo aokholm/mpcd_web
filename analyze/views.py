@@ -2,6 +2,7 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from mesdata.models import MeasurementSet
 import mesdata.PCfunctions as pc
+import mesdata.PlotFunction as pf
 from analyze.charthelper import chartDataJoin
 from django.db.models import Q
 import numpy as np, math
@@ -208,8 +209,6 @@ def plots(request, app_name):
 
     # Fourth plot - sorting ITG for diameter
     
-    
-    
     diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
     notdiMeasurements = MeasurementSet.objects.filter(~Q(specification_type='DI'))
     
@@ -218,92 +217,11 @@ def plots(request, app_name):
     lst_other = [messet.itg for messet in notdiMeasurements]
     id2 = [messet.id for messet in notdiMeasurements]
 
-    description4 = {
-    "itg": ("number" , "IT grade"),
-    "cum_freq1": ("number" , "cumulative frequency"),
-    "tooltip1" : ("string","Tip1",{"role":"tooltip"}),
-    "best_fit1" : ("number", "best fit"),
-    "cum_freq2": ("number" , "cumulative frequency"),
-    "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
-    "best_fit2" : ("number", "best fit")
-    }
+    json4 , option4= pf.lists2JsonOptions (lst_diameter,id1,lst_other,id2)
 
-    data4 =[]
-
-    yvalue1 = np.linspace(0,1, len(lst_diameter)).tolist()
-    sorted_itg1, sorted_id1 = zip(*sorted(zip(lst_diameter,id1)))
-
-    yvalue2 = np.linspace(0,1, len(lst_other)).tolist()
-    sorted_itg2, sorted_id2 = zip(*sorted(zip(lst_other,id2)))
-
-    for i in range(len(sorted_id1)):
-        data4.append({
-            "itg": sorted_itg1[i],
-            "cum_freq1": yvalue1[i],
-            "tooltip1": ("data from No. %s" % sorted_id1[i])
-                })
-    for i in range(len(sorted_id2)):
-        data4.append({
-            "itg": sorted_itg2[i],
-            "cum_freq2": yvalue2[i],
-            "tooltip2": ("data from No. %s" % sorted_id2[i])
-                })
-
-    [xvalue1 , cdfvalue1] = pc.list2cdf(lst_diameter)
-    [xvalue2 , cdfvalue2] = pc.list2cdf(lst_other)
-
-    for i in range(len(xvalue1)):
-        data4.append({
-            "itg": xvalue1[i],
-            "best_fit1": cdfvalue1[i],
-            })
-
-    for i in range(len(xvalue2)):
-        data4.append({
-            "itg": xvalue2[i],
-            "best_fit2": cdfvalue2[i],
-            })
-
-    data_table4 = gviz_api.DataTable(description4)
-    data_table4.LoadData(data4)
-
-    json4 = data_table4.ToJSon(columns_order=("itg","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
-
-    option4 = {
-        'title': 'comparison of acumulated frequency of diameter vs.  all data',
-        'vAxis': {
-            'title': 'Probability',
-        },
-        'hAxis': {
-            'title': 'tolerance (IT Grade)',
-        },
-        'legend': 'none',
-        'series': {
-            # series 0 is the Scatter
-            0: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            1: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'blue',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-            2: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            3: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'orange',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-        },
-    }
+    option4.update({
+        'title': 'Acumulate frequency of IT grade of diameters vs. all other data'
+        })
 
     # fifth plot - sorting first run
     
@@ -317,92 +235,12 @@ def plots(request, app_name):
     lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
     lst_otherid = [sets.id for sets in notFirstRunQuerySet]
     
-    description5 = {
-    "itg": ("number" , "IT grade"),
-    "cum_freq1": ("number" , "cumulative frequency"),
-    "tooltip1" : ("string","Tip1",{"role":"tooltip"}),
-    "best_fit1" : ("number", "best fit"),
-    "cum_freq2": ("number" , "cumulative frequency"),
-    "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
-    "best_fit2" : ("number", "best fit")
-    }
+    json5 , option5= pf.lists2JsonOptions (lst_firstRunItg,lst_firstRunId,lst_otherItg,lst_otherid)
 
-    data5 =[]
-
-    yvalue1 = np.linspace(0,1, len(lst_firstRunItg)).tolist()
-    sorted_itg1, sorted_id1 = zip(*sorted(zip(lst_firstRunItg,lst_firstRunId)))
-
-    yvalue2 = np.linspace(0,1, len(lst_otherItg)).tolist()
-    sorted_itg2, sorted_id2 = zip(*sorted(zip(lst_otherItg,lst_otherid)))
-
-    for i in range(len(sorted_id1)):
-        data5.append({
-            "itg": sorted_itg1[i],
-            "cum_freq1": yvalue1[i],
-            "tooltip1": ("data from No. %s" % sorted_id1[i])
-                })
-    for i in range(len(sorted_id2)):
-        data5.append({
-            "itg": sorted_itg2[i],
-            "cum_freq2": yvalue2[i],
-            "tooltip2": ("data from No. %s" % sorted_id2[i])
-                })
-
-    [xvalue1 , cdfvalue1] = pc.list2cdf(lst_firstRunItg)
-    [xvalue2 , cdfvalue2] = pc.list2cdf(lst_otherItg)
-
-    for i in range(len(xvalue1)):
-        data5.append({
-            "itg": xvalue1[i],
-            "best_fit1": cdfvalue1[i],
-            })
-
-    for i in range(len(xvalue2)):
-        data5.append({
-            "itg": xvalue2[i],
-            "best_fit2": cdfvalue2[i],
-            })
-
-    data_table5 = gviz_api.DataTable(description5)
-    data_table5.LoadData(data5)
-
-    json5 = data_table5.ToJSon(columns_order=("itg","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
-
-    option5 = {
-        'title': 'comparison of acumulated frequency of first production run vs.  all data',
-        'vAxis': {
-            'title': 'Probability',
-        },
-        'hAxis': {
-            'title': 'tolerance (IT Grade)',
-        },
-        'legend': 'none',
-        'series': {
-            # series 0 is the Scatter
-            0: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            1: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'blue',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-            2: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            3: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'orange',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-        },
-    }
+    option5.update({
+        'title': 'comparison of acumulated frequency of first production run vs.  all data'
+        })
+       
                 
             
             
