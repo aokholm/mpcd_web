@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime    
 from django import forms
+from wx._gdi import BLACK
 
 # Create your models here.
 class Measurement(models.Model):
@@ -18,16 +19,18 @@ class MeasurementSet(models.Model):
     mean_shift = models.FloatField('Mean Shift', blank=True, null=True)
     std = models.FloatField('Standard deviation',blank=True, null=True)
     
-    ca = models.FloatField('Process Centering', blank=True, null=True, editable=False)
+    pcsl = models.FloatField('PCSL', blank=True, null=True)
+    ca = models.FloatField('Process Centering', blank=True, null=True)
     ca_pcsl = models.FloatField('Process Cent. PCSL', blank=True, null=True)
     cb = models.FloatField('Normalized Bias', blank=True, null=True)
     cp = models.FloatField('Process Variation', blank=True, null=True)
-    itg = models.FloatField('PCSL (IT grade)', blank=True, null=True)
-    itg_spec = models.FloatField('Spec. IT grade', blank = True, null = True)
+    itg = models.FloatField('Spec. IT grade', blank = True, null = True)
+    itg_pcsl = models.FloatField('PCSL (IT grade)', blank=True, null=True)
     
-    nominal_size = models.FloatField('Nominal Size', blank=True, null=True)
-    tol_up = models.FloatField('Upper tolerance',blank=True, null=True) 
-    tol_low = models.FloatField('Lower tolerance',blank=True, null=True)
+    target = models.FloatField('Nominal / Target')
+    usl = models.FloatField('Upper tolerance',blank=True, null=True)
+    lsl = models.FloatField('Lower tolerance',blank=True, null=True)
+    symtol = models.FloatField('Symmetric tolerance', blank=True, null=True)
 
     price = models.FloatField('Price per 1000 [$]',blank=True, null=True) 
     weight = models.FloatField('Weight of product [kg]',blank=True, null=True)

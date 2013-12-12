@@ -23,8 +23,8 @@ def plots(request, app_name):
     measurements_sets = MeasurementSet.objects.all()
 
     id_set = [messet.id for messet in measurements_sets]
-    itgrade = [messet.itg for messet in measurements_sets]
-    itgrade_spec = [messet.itg_spec for messet in measurements_sets]
+    itgrade = [messet.itg_pcsl for messet in measurements_sets]
+    itgrade_spec = [messet.itg for messet in measurements_sets]
     cp = [messet.cp for messet in measurements_sets]
 
     # FIRST PLOT - ITG vs. ITG SPEC
@@ -218,7 +218,7 @@ def plots(request, app_name):
 def design(request, app_name):
     measurements_sets = MeasurementSet.objects.all().prefetch_related('process', 'material')
 
-    itgrades = sorted([messet.itg for messet in measurements_sets])
+    itgrades = sorted([messet.itg_pcsl for messet in measurements_sets])
 
     nominalsize = ""
     if request.GET.get('nominalsize'):
@@ -421,7 +421,7 @@ def process(request, app_name):
     json = data_table.ToJSon(columns_order=("Bias","Cpk","Cpk_tool","Deviation","Deviation_tool"))
 
     count = [messet.count for messet in measurements_sets]
-    itg = [messet.itg for messet in measurements_sets]
+    itg = [messet.itg_pcsl for messet in measurements_sets]
    
     option = {
         'title': 'Bias vs. Deviation',

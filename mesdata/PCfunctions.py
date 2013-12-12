@@ -1,6 +1,6 @@
 import numpy as np
+import math
 from scipy.stats import norm
-
 
 """Conversion funciton between ITgrade and Symtolerance - Input Should be in millimeters"""
 	
@@ -32,7 +32,7 @@ def stdMeanshiftCpk2Symtol(std,meanshift, cpk):
 
 def dimStdMeanshiftCpk2Itg(dim,std,meanshift,cpk):
 
-	# Calculates a IT grade from meanshift, stadard deviation and cpk-value
+	# Calculates a IT grade from meanshift, standard deviation and cpk-value
 
 	symtol = stdMeanshiftCpk2Symtol(std,meanshift,cpk)
 
@@ -40,13 +40,17 @@ def dimStdMeanshiftCpk2Itg(dim,std,meanshift,cpk):
 
 	return itg
 
-def upperLowerTol2SymTol(upper, lower):
+def UslLsl2SymTol(USL, LSL):
 	
 	# Calculates symmetric tolerance width
 
-	tol_spec = (upper-lower)/2.0
+	symtol = (USL-LSL)/2.0
 
-	return tol_spec
+	return symtol
+
+def c4stdCorrectionFactor(n):
+	
+	return math.sqrt( 2.0 / (n-1)) * math.gamma(n/2.0) / math.gamma((n-1)/2.0)
 
 def list2cdf (input_data):
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from mesdata.models import Measurement, MeasurementSet
-from mesdata.PCfunctions import *
+from mesdata.models import Measurement
+from mesdata.PCfunctions import stdMeanshiftCpk2Symtol, UslLsl2SymTol, c4stdCorrectionFactor, dimSymtol2Itg
 from numpy import mean, std
 
 
@@ -18,15 +18,15 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         'm2m' : ['generaltag'],
     }
 
-    readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_spec')
-    list_display = ('id','count','itg','nominal_size','pub_date',)
+    readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
+    list_display = ('id','count','itg','target','pub_date',)
     search_fields = ['id','material__name', 'process__name', 'generaltag__name', 'equipment__name']
     list_filter = ['pub_date', ]
 
     fieldsets = [
         (None,   {
             'classes': ('grp-collapse grp-open',),
-            'fields': ['nominal_size','material','process','equipment','generaltag','specification_type','tol_up','tol_low','pub_date' ]
+            'fields': ['target','material','process','equipment','generaltag','specification_type','usl','lsl','pub_date' ]
         }),
         ('Additional information', {
             'classes': ('grp-collapse grp-open',),
@@ -34,7 +34,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         }),
         ('Process capability information', {
             'classes': ('grp-collapse grp-open',),
-            'fields': ['ca','ca_pcsl','cb','cp','itg','itg_spec']
+            'fields': ['ca','ca_pcsl','cb','cp','itg','itg_pcsl']
         }),
     ]
     inlines = (MeasurementInline, )
@@ -49,18 +49,22 @@ class MeasurementSetAdmin(admin.ModelAdmin):
 
     def after_saving_model_and_related_inlines(self, obj):
         measurements = [x.actual_size for x in obj.measurements.all()]
+        
         obj.count = len(measurements)
-        nominal_size = obj.nominal_size
-
         obj.cpk = 1.66
-        obj.mean_shift = nominal_size - mean(measurements)
-        obj.std = std(measurements) # Should implement correction factor
-        obj.itg = dimStdMeanshiftCpk2Itg(nominal_size, obj.std, obj.mean_shift, obj.cpk)
-        obj.itg_spec = dimSymtol2Itg(nominal_size, upperLowerTol2SymTol( obj.tol_up, obj.tol_low))
-        obj.ca = 1 - abs(obj.mean_shift)/upperLowerTol2SymTol( obj.tol_up, obj.tol_low)
-        obj.ca_pcsl = 1-abs(obj.mean_shift)/stdMeanshiftCpk2Symtol(obj.std, obj.mean_shift, obj.cpk)
-        obj.cb = obj.mean_shift / upperLowerTol2SymTol( obj.tol_up, obj.tol_low)
-        obj.cp = upperLowerTol2SymTol( obj.tol_up, obj.tol_low) / (3 * obj.std)
+        obj.mean_shift = obj.target - mean(measurements)
+        obj.std = std(measurements, ddof=1)/c4stdCorrectionFactor(obj.count)
+        
+        obj.pcsl = stdMeanshiftCpk2Symtol(obj.std, obj.mean_shift, obj.cpk)
+        obj.symtol = UslLsl2SymTol( obj.usl, obj.lsl)
+        
+        obj.itg = dimSymtol2Itg(obj.target, obj.symtol)
+        obj.itg_pcsl = dimSymtol2Itg(obj.target, obj.pcsl)
+      
+        obj.ca = 1 - abs(obj.mean_shift) / obj.symtol
+        obj.ca_pcsl = 1-abs(obj.mean_shift)/ obj.pcsl
+        obj.cb = obj.mean_shift / obj.symtol
+        obj.cp = obj.symtol / (3 * obj.std)
 
         obj.save()
         return obj
