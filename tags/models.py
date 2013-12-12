@@ -2,8 +2,8 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
 from string import join
-from django.contrib import admin
-from mptt.admin import MPTTModelAdmin
+#from django.contrib import admin
+#from mptt.admin import MPTTModelAdmin
 
 
 ## Models

@@ -309,13 +309,8 @@ def plots(request, app_name):
     
     FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
     
-    FirstRunQuerySet = MeasurementSet.objects.filter(generaltag__in = [FirstRunGeneralTag]).distinct()
-    notFirstRunQuerySet = MeasurementSet.objects.filter(~Q(generaltag__in = [FirstRunGeneralTag])).distinct()
-    
-    lst_firstRunItg = [sets.itg for sets in FirstRunQuerySet]
-    lst_otherItg = [sets.itg for sets in notFirstRunQuerySet]
-    lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
-    lst_otherid = [sets.id for sets in notFirstRunQuerySet]
+    FirstRunQuerySet = MeasurementSet.objects.filter(generaltag__in = [FirstRunGeneralTag]).order_by('itg_pcsl').distinct()
+    notFirstRunQuerySet = MeasurementSet.objects.filter(~Q(generaltag__in = [FirstRunGeneralTag])).order_by('itg_pcsl').distinct()
     
     description5 = {
     "itg": ("number" , "IT grade"),
@@ -329,27 +324,30 @@ def plots(request, app_name):
 
     data5 =[]
 
-    yvalue1 = np.linspace(0,1, len(lst_firstRunItg)).tolist()
-    sorted_itg1, sorted_id1 = zip(*sorted(zip(lst_firstRunItg,lst_firstRunId)))
-
-    yvalue2 = np.linspace(0,1, len(lst_otherItg)).tolist()
-    sorted_itg2, sorted_id2 = zip(*sorted(zip(lst_otherItg,lst_otherid)))
-
-    for i in range(len(sorted_id1)):
+    def addCumFreqValues(messets):
+        for i in range(len(messets)):
+            messets[i].cumFreq = (i+1)*(1/float(len(messets)+1))
+        
+    addCumFreqValues(FirstRunQuerySet)
+    addCumFreqValues(notFirstRunQuerySet)
+    
+    
+    for i in range(len(FirstRunQuerySet)):
         data5.append({
-            "itg": sorted_itg1[i],
-            "cum_freq1": yvalue1[i],
-            "tooltip1": ("data from No. %s" % sorted_id1[i])
+            "itg": FirstRunQuerySet[i].itg_pcsl,
+            "cum_freq1": FirstRunQuerySet[i].cumFreq,
+            "tooltip1": ("data from No. %s" % FirstRunQuerySet[i].id)
                 })
-    for i in range(len(sorted_id2)):
+        
+    for i in range(len(notFirstRunQuerySet)):
         data5.append({
-            "itg": sorted_itg2[i],
-            "cum_freq2": yvalue2[i],
-            "tooltip2": ("data from No. %s" % sorted_id2[i])
+            "itg": notFirstRunQuerySet[i].itg_pcsl,
+            "cum_freq2": notFirstRunQuerySet[i].cumFreq,
+            "tooltip2": ("data from No. %s" % notFirstRunQuerySet[i].id)
                 })
-
-    [xvalue1 , cdfvalue1] = pc.list2cdf(lst_firstRunItg)
-    [xvalue2 , cdfvalue2] = pc.list2cdf(lst_otherItg)
+       
+    [xvalue1 , cdfvalue1] = pc.list2cdf([messet.itg_pcsl for messet in FirstRunQuerySet])
+    [xvalue2 , cdfvalue2] = pc.list2cdf([messet.itg_pcsl for messet in notFirstRunQuerySet])
 
     for i in range(len(xvalue1)):
         data5.append({
