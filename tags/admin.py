@@ -35,4 +35,3 @@ class GeneralTagAdmin(MPTTModelAdmin):
 class MeasurementEquipmentAdmin(MPTTModelAdmin):
     list_display = ['name',]
     search_fields = ['name',]
-

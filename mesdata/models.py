@@ -13,7 +13,57 @@ class Measurement(models.Model):
     def __unicode__(self):
         return str(self.actual_size)
 
+class MeasurementCompany(models.Model):
+    name = models.CharField(max_length=60, unique=True)
+    
+    COUNTRY_CHOICES = (
+            ('DK', 'Denmark'),
+            ('CH', 'China'),)
+    country = models.CharField(max_length=2, choices=COUNTRY_CHOICES, default='DK')
+    
+    def __unicode__(self):
+        return self.name
+    
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("name__icontains", ) # "process_names__name__icontains"
+    
+class Manufacturer(models.Model):
+    name = models.CharField(max_length=60, unique=True)
+    
+    def __unicode__(self):
+        return self.name
+    
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("name__icontains", ) # "process_names__name__icontains"
+    
+
+class MeasurementReport(models.Model):
+    part_name = models.CharField('Part Name', max_length=60)
+    drawingKey = models.CharField('Drawing Key', max_length = 60, unique=True, blank = True, null= True)
+    
+    material = models.ForeignKey('tags.Material', related_name='measurement_sets')
+    material.allow_tags = True
+    process = models.ForeignKey('tags.Process',related_name='measurement_sets')
+    
+    manufacturer = models.ForeignKey('mesdata.Manufacturer', related_name='measurement_sets', blank=True,null=True)
+    measurementCompany = models.ForeignKey('mesdata.MeasurementCompany', related_name='measurement_sets', blank=True,null=True)
+    
+    machine = models.CharField('Machine Code',max_length=200,blank=True, null=True)
+    
+    part_yield = models.CharField('Part yield',max_length=200,blank=True, null=True)
+    pub_date = models.DateTimeField('Date Published',default=datetime.now, blank=False)
+    price = models.FloatField('Price per 1000 [$]',blank=True, null=True) 
+    weight = models.FloatField('Weight of product [kg]',blank=True, null=True)
+    measured = models.CharField('Measurement ',max_length=200,blank=True, null=True)
+    
+    def __unicode__(self):
+        return str(self.id) + ' ' + self.part_name + ' ' + self.drawingKey
+
+
 class MeasurementSet(models.Model):
+    measurement_number = models.CharField(max_length=6)
     count = models.IntegerField('No. Measurements',blank=True, default=0)
     mean = models.FloatField('Mean', blank=True, null=True)
     mean_shift = models.FloatField('Mean Shift', blank=True, null=True)
@@ -32,20 +82,10 @@ class MeasurementSet(models.Model):
     lsl = models.FloatField('Lower tolerance',blank=True, null=True)
     symtol = models.FloatField('Symmetric tolerance', blank=True, null=True)
 
-    price = models.FloatField('Price per 1000 [$]',blank=True, null=True) 
-    weight = models.FloatField('Weight of product [kg]',blank=True, null=True)
-    manufac = models.CharField('Manufacturer',max_length=200,blank=True, null=True)
-    measured = models.CharField('Measured by whom',max_length=200,blank=True, null=True)
-    machine = models.CharField('Which Machine',max_length=200,blank=True, null=True)
-    pro_yield = models.CharField('Production yield',max_length=200,blank=True, null=True)
-    pub_date = models.DateTimeField('Date Published',default=datetime.now, blank=False)
-
-    material = models.ForeignKey('tags.Material', related_name='measurement_sets')
-    material.allow_tags = True
-    process = models.ForeignKey('tags.Process',related_name='measurement_sets')
+    measurement_report = models.ForeignKey('mesdata.MeasurementReport', related_name='measurement_sets')
     generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_sets',blank=True,null=True)
-    equipment = models.ForeignKey('tags.MeasurementEquipment',related_name='measurement_sets')
-
+    measurement_equipment = models.ForeignKey('tags.MeasurementEquipment',  related_name='measurement_sets')
+    
 
     RADIUS = 'R'
     DIAMETER = 'D'

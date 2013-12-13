@@ -2,8 +2,8 @@ from django.conf.urls import include, url, patterns
 from django.contrib import admin
 from django.http import HttpResponse
 
-from mesdata.models import Measurement, MeasurementSet
-from mesdata.admin import MeasurementSetAdmin
+from mesdata.models import MeasurementSet, Manufacturer, MeasurementCompany, MeasurementReport
+from mesdata.admin import MeasurementSetAdmin, ManufacturerAdmin, MeasurementCompanyAdmin
 from tags.models import *
 from tags.admin import *
 
@@ -30,11 +30,16 @@ class MyAdminSite(admin.AdminSite):
 admin_site = MyAdminSite('myadmin')  
 
 admin_site.register(MeasurementSet,MeasurementSetAdmin)
+admin_site.register(Manufacturer, ManufacturerAdmin)
+admin_site.register(MeasurementCompany, MeasurementCompanyAdmin)
+admin_site.register(MeasurementReport)
+
 
 admin_site.register(Material, MaterialAdmin)
 admin_site.register(Process, ProcessAdmin)
 admin_site.register(GeneralTag, GeneralTagAdmin)
 admin_site.register(MeasurementEquipment, GeneralTagAdmin)
+
 
 
 admin_site.register(Group, GroupAdmin)

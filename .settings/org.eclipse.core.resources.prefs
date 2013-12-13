@@ -1,4 +1,2 @@
 eclipse.preferences.version=1
-encoding//mesdata/migrations/0003_USL.py=utf-8
-encoding//mesdata/migrations/0005_target.py=utf-8
-encoding//mesdata/migrations/0007_itg.py=utf-8
+encoding//mesdata/migrations/0002_measurementEquipment.py=utf-8

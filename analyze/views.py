@@ -76,6 +76,7 @@ def plots(request, app_name):
     data_table44.LoadData(data44)
     json44 = data_table44.ToJSon(columns_order=("xvalue","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
 
+    
     # fifth plot - sorting first run
     
     FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')

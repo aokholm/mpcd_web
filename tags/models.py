@@ -144,3 +144,4 @@ class MeasurementEquipment(MPTTModel):
             children = ""
 
         return u"%s %s%s" % (indent_string, self.name, children)
+    

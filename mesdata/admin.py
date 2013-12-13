@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mesdata.models import Measurement
+from mesdata.models import Measurement, Manufacturer, MeasurementCompany, MeasurementReport
 from mesdata.PCfunctions import stdMeanshiftCpk2Symtol, UslLsl2SymTol, c4stdCorrectionFactor, dimSymtol2Itg
 from numpy import mean, std
 
@@ -8,31 +8,37 @@ class MeasurementInline(admin.TabularInline):
     classes = ('grp-collapse grp-open',)
     model = Measurement
     extra = 10
+    
+class ManufacturerAdmin(admin.ModelAdmin):
+    model = Manufacturer
+    
+class MeasurementCompanyAdmin(admin.ModelAdmin):
+    model = MeasurementCompany
 
 class MeasurementSetAdmin(admin.ModelAdmin):
-    raw_id_fields = ('material','process','generaltag','equipment',)
+    raw_id_fields = ('generaltag','measurement_equipment',)
 
     autocomplete_lookup_fields = {
-        'fk' : ['material', 'process', 'equipment'],
+        'fk' : ['measurement_equipment'],
         'm2m' : ['generaltag'],
     }
 
     readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
-    list_display = ('id','count','itg','target','pub_date',)
-    search_fields = ['id','material__name', 'process__name', 'generaltag__name', 'equipment__name']
-    list_filter = ['pub_date', ]
+    list_display = ('id', 'measurement_report', 'count','itg','target')
+    search_fields = ['id','measurement_report__material__name', 'measurement_report__process__name', 'generaltag__name', 'equipment__name']
+    list_filter = [ ]
 
     fieldsets = [
         (None,   {
             'classes': ('grp-collapse grp-open',),
-            'fields': ['target','material','process','equipment','generaltag','specification_type','usl','lsl','pub_date' ]
+            'fields': ['measurement_report', 'measurement_number', 'measurement_equipment','generaltag','specification_type','target', 'usl','lsl']
         }),
-        ('Additional information', {
-            'classes': ('grp-collapse grp-open',),
-            'fields': ['price','weight','manufac','measured','machine','pro_yield']
-        }),
+#         ('Additional information', {
+#             'classes': ('grp-collapse grp-open',),
+#             'fields': ['price','weight','manufac','measured','machine','pro_yield']
+#         }),
         ('Process capability information', {
-            'classes': ('grp-collapse grp-open',),
+            'classes': ('grp-collapse grp-closed',),
             'fields': ['ca','ca_pcsl','cb','cp','itg','itg_pcsl']
         }),
     ]

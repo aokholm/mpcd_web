@@ -1,30 +1,57 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        db.rename_column('mesdata_measurementset', 'itg', 'itg_pcsl')
-        db.rename_column('mesdata_measurementset', 'itg_spec', 'itg')
+        # Adding field 'MeasurementSet.measurement_number'
+        db.add_column(u'mesdata_measurementset', 'measurement_number',
+                      self.gf('django.db.models.fields.CharField')(default='None', max_length=6),
+                      keep_default=False)
 
-        
+
     def backwards(self, orm):
-        "Write your backwards methods here."
-        db.rename_column('mesdata_measurementset', 'itg', 'itg_spec')
-        db.rename_column('mesdata_measurementset', 'itg_pcsl', 'itg')
+        # Deleting field 'MeasurementSet.measurement_number'
+        db.delete_column(u'mesdata_measurementset', 'measurement_number')
+
+
     models = {
+        u'mesdata.manufacturer': {
+            'Meta': {'object_name': 'Manufacturer'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '60'})
+        },
         u'mesdata.measurement': {
             'Meta': {'object_name': 'Measurement'},
             'actual_size': ('django.db.models.fields.FloatField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'measurement_set': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurements'", 'to': u"orm['mesdata.MeasurementSet']"})
+        },
+        u'mesdata.measurementcompany': {
+            'Meta': {'object_name': 'MeasurementCompany'},
+            'country': ('django.db.models.fields.CharField', [], {'default': "'DK'", 'max_length': '2'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '60'})
+        },
+        u'mesdata.measurementreport': {
+            'Meta': {'object_name': 'MeasurementReport'},
+            'drawingKey': ('django.db.models.fields.CharField', [], {'max_length': '60', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'machine': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'manufacturer': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'measurement_sets'", 'null': 'True', 'to': u"orm['mesdata.Manufacturer']"}),
+            'material': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.Material']"}),
+            'measured': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'measurementCompany': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'measurement_sets'", 'null': 'True', 'to': u"orm['mesdata.MeasurementCompany']"}),
+            'part_name': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
+            'part_yield': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'price': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'process': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.Process']"}),
+            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'weight': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
         },
         u'mesdata.measurementset': {
             'Meta': {'object_name': 'MeasurementSet'},
@@ -33,29 +60,22 @@ class Migration(DataMigration):
             'cb': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'count': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'cp': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'equipment': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.MeasurementEquipment']"}),
             'generaltag': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'measurement_sets'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['tags.GeneralTag']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'itg': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'itg_spec': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
+            'itg_pcsl': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'lsl': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'machine': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'manufac': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'material': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.Material']"}),
             'mean': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'mean_shift': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'measured': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'measurement_equipment': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.MeasurementEquipment']"}),
+            'measurement_number': ('django.db.models.fields.CharField', [], {'max_length': '6'}),
+            'measurement_report': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['mesdata.MeasurementReport']"}),
             'pcsl': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'price': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'pro_yield': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'process': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'measurement_sets'", 'to': u"orm['tags.Process']"}),
-            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'specification_type': ('django.db.models.fields.CharField', [], {'default': "'O'", 'max_length': '2'}),
             'std': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'symtol': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'target': ('django.db.models.fields.FloatField', [], {}),
-            'usl': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
-            'weight': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
+            'usl': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'})
         },
         u'tags.generaltag': {
             'Meta': {'object_name': 'GeneralTag'},
@@ -100,4 +120,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['mesdata']
-    symmetrical = True
