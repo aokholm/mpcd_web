@@ -8,12 +8,14 @@ from django.db.models import Q
 import numpy as np, math
 from prettytable import PrettyTable
 from scipy.stats import norm, chi2
+from analyze.util.plots import Plot
 
 import gviz_api
 from django.utils.safestring import mark_safe
 
 from tags.models import GeneralTag
 from numpy.numarray.alter_code1 import setshape_re
+from test.test_urllib import Utility_Tests
 
 # Create your views here.
 def index(request, app_name):
@@ -36,177 +38,19 @@ def plots(request, app_name):
 
 
     # FIRST PLOT - ITG vs. ITG SPEC
-    description1 = {
-    "itgrade": ("number" , "IT Grade"),
-    "itgrade_spec": ("number" , "specified IT Grade"),
-    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
-    "xyline" : ("number", "Helper line"),
-    }
-
-    data1 =[]
-
-    for i in range(len(id_set)):
-        data1.append({
-            "itgrade": itgrade[i],
-            "itgrade_spec": itgrade_spec[i],
-            "tooltip": ("data from No. %s" % id_set[i])
-                })
-
-    xline = [10 , 15]
-
-    for i in range(2):
-        data1.append({
-            "itgrade": xline[i],
-            "xyline": xline[i],
-            })
-
-    data_table1 = gviz_api.DataTable(description1)
-    data_table1.LoadData(data1)
-
-    json1 = data_table1.ToJSon(columns_order=("itgrade","itgrade_spec","tooltip","xyline"))
-
-    option1 = {
-        'title': 'Actual tolerance (IT grade) as a function of specified tolerance (IT grade)',
-        'vAxis': {
-            'title': 'Specified IT grade',
-        },
-        'hAxis': {
-            'title': 'Actual IT grade',
-        },
-        'legend': 'none',
-        'series': {
-            # series 0 is the Scatter
-            0: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            1: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'red',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-        },
-    }
-
+    plot1 = Plot()
+    plot1.addDots(itgrade,itgrade_spec,id_set)
+    plot1.addLine([8, 15],[8,15])
 
     # SECOND PLOT - ITG ALL
-    description2 = {
-    "itgrade": ("number" , "cp"),
-    "cum_freq": ("number" , "cumulative frequency"),
-    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
-    "best_fit" : ("number", "best fit")
-    }
+    plot2 = Plot()
+    plot2.addList(itgrade,id_set)    
 
-    data2 =[]
-
-    yvalue = np.linspace(0,1, len(itgrade)).tolist()
-    sorted_itgrade, sorted_id = zip(*sorted(zip(itgrade,id_set)))
-
-    for i in range(len(id_set)):
-        data2.append({
-            "itgrade": sorted_itgrade[i],
-            "cum_freq": yvalue[i],
-            "tooltip": ("data from No. %s" % sorted_id[i])
-                })
-
-    [xvalue , cdfvalue] = pc.list2cdf (itgrade)
-
-    for i in range(len(xvalue)):
-        data2.append({
-            "itgrade": xvalue[i],
-            "best_fit": cdfvalue[i],
-            })
-
-    data_table2 = gviz_api.DataTable(description2)
-    data_table2.LoadData(data2)
-
-    json2 = data_table2.ToJSon(columns_order=("itgrade","cum_freq","tooltip","best_fit"))
-
-    option2 = {
-        'title': 'Acumulated frequency of IT grade for all data',
-        'vAxis': {
-            'title': 'Probability',
-        },
-        'hAxis': {
-            'title': 'Tolerance (IT grade)',
-        },
-        'legend': 'none',
-        'series': {
-            # series 0 is the Scatter
-            0: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            1: {
-                'lineWidth': 2,
-                'pointSize': 0,
-                'color': 'red',
-                'enableInteractivity': 'false',
-                'tooltip': 'none'
-            },
-        },
-    }
-
-# Third PLOT - CP ALL
-    description3 = {
-    "cp": ("number" , "cp"),
-    "cum_freq": ("number" , "cumulative frequency"),
-    "tooltip" : ("string","Tip1",{"role":"tooltip"}),
-    "best_fit" : ("number", "best fit")
-    }
-
-    data3 =[]
-
-    yvalue = np.linspace(0,1, len(cp)).tolist()
-    sorted_cp, sorted_id = zip(*sorted(zip(cp,id_set)))
-
-    for i in range(len(id_set)):
-        data3.append({
-            "cp": sorted_cp[i],
-            "cum_freq": yvalue[i],
-            "tooltip": ("data from No. %s" % sorted_id[i])
-                })
-
-    #[xvalue , cdfvalue] = pc.list2cdf(cp)
-
-    #    for i in range(len(xvalue)):
-    #    data3.append({
-    #        "cp": xvalue[i],
-    #        "best_fit": cdfvalue[i],
-    #        })
-
-    data_table3 = gviz_api.DataTable(description3)
-    data_table3.LoadData(data3)
-
-    json3 = data_table3.ToJSon(columns_order=("cp","cum_freq","tooltip","best_fit"))
-
-    option3 = {
-        'title': 'Acumulated frequency of Cp for all data',
-        'vAxis': {
-            'title': 'Probability',
-        },
-        'hAxis': {
-            'title': 'Cp process variance',
-        },
-        'legend': 'none',
-        'series': {
-            # series 0 is the Scatter
-            0: {
-            # you can omit this if you choose not to set any options for this series
-            },
-            # series 1 is the Line
-            #1: {
-            #    'lineWidth': 2,
-            #    'pointSize': 0,
-            #    'color': 'red',
-            #    'enableInteractivity': 'false',
-            #    'tooltip': 'none'
-            #},
-        },
-    }
-
+    # Third PLOT - CP ALL
+    plot3 = Plot()
+    plot3.addDots(id_set,cp,id_set)    
+    
+    
     # Fourth plot - sorting ITG for diameter
     
     diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
@@ -343,12 +187,12 @@ def plots(request, app_name):
         {
         'app_label': app_name,
         'view_label': 'lots og plot',
-        'json1' : mark_safe(json1),
-        'option1' : option1,
-        'json2' : mark_safe(json2),
-        'option2' : option2,
-        'json3' : mark_safe(json3),
-        'option3' : option3,
+        'json1' : plot1.getJson(),
+        'option1' : plot1.getOption(),
+        'json2' : plot2.getJson(),
+        'option2' : plot2.getOption(),
+        'json3' : plot3.getJson(),
+        'option3' : plot3.getOption(),
         'json4' : mark_safe(json4),
         'option4' : option4,
         'json5' : mark_safe(json5),
