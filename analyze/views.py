@@ -254,12 +254,6 @@ def plots(request, app_name):
     "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
     "best_fit2" : ("number", "best fit")
     }
-    lst_firstRunItg = [sets.itg for sets in FirstRunQuerySet]
-    lst_otherItg = [sets.itg for sets in notFirstRunQuerySet]
-    lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
-    lst_otherid = [sets.id for sets in notFirstRunQuerySet]
-    
-    json55 , option55= pf.lists2JsonOptions (lst_firstRunItg,lst_firstRunId,lst_otherItg,lst_otherid)
 
     data5 =[]
 
