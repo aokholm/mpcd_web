@@ -30,9 +30,6 @@ def plots(request, app_name):
     itgrade_spec = [messet.itg for messet in measurements_sets]
     cp = [messet.cp for messet in measurements_sets]
 
-    material = [messet.material.name for messet in measurements_sets]
-    specification_type = [messet.specification_type for messet in measurements_sets]
-
 
     # FIRST PLOT - ITG vs. ITG SPEC
     plot1 = Plot()
