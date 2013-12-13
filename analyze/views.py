@@ -223,6 +223,10 @@ def plots(request, app_name):
         'title': 'Acumulate frequency of IT grade of diameters vs. all other data'
         })
 
+    
+    
+    
+    
     # fifth plot - sorting first run
     
     FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
@@ -239,12 +243,6 @@ def plots(request, app_name):
     "tooltip2" : ("string","Tip2",{"role":"tooltip"}),
     "best_fit2" : ("number", "best fit")
     }
-    lst_firstRunItg = [sets.itg for sets in FirstRunQuerySet]
-    lst_otherItg = [sets.itg for sets in notFirstRunQuerySet]
-    lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
-    lst_otherid = [sets.id for sets in notFirstRunQuerySet]
-    
-    json5 , option5= pf.lists2JsonOptions (lst_firstRunItg,lst_firstRunId,lst_otherItg,lst_otherid)
 
     data5 =[]
 
@@ -324,14 +322,7 @@ def plots(request, app_name):
                 'tooltip': 'none'
             },
         },
-    }
-    option5.update({
-        'title': 'comparison of acumulated frequency of first production run vs.  all data'
-        })
-       
-                
-            
-            
+    }       
 
 
     return render(request, 'analyze/plots.html', 
