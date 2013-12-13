@@ -3,19 +3,16 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 import mesdata.PCfunctions as pc
 import mesdata.PlotFunction as pf
-from analyze.charthelper import chartDataJoin
 from django.db.models import Q
 import numpy as np, math
 from prettytable import PrettyTable
-from scipy.stats import norm, chi2
+from scipy.stats import norm
 from analyze.util.plots import Plot
 
 import gviz_api
 from django.utils.safestring import mark_safe
 
 from tags.models import GeneralTag
-from numpy.numarray.alter_code1 import setshape_re
-from test.test_urllib import Utility_Tests
 
 # Create your views here.
 def index(request, app_name):
