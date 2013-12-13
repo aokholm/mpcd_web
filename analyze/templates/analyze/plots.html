@@ -32,11 +32,18 @@
         
             var firstitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_firstitg'));
             var firstitg_data = new google.visualization.DataTable({{json5}}, 0.6);
-            var firstitg_options = {{option5|safe}};
-            firstitg_chart.draw(firstitg_data, firstitg_options);
+            var firstitg_options = {{option5|safe}};            
+            diaitg_chart.draw(diaitg_data, diaitg_options);
+            
+            var Aitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_Aitg'));
+            var Aitg_data = new google.visualization.DataTable({{json44}}, 0.6);
+            var Aitg_options = {{option44|safe}};            
+            Aitg_chart.draw(Aitg_data, Aitg_options);
         }
     </script>
 {% endblock %}
+
+<!--#firstitg_chart.draw(firstitg_data, firstitg_options);-- >
 
 <!-- BREADCRUMBS -- >
 {% if not is_popup %}
@@ -58,6 +65,7 @@
     <div id="chart_div_totalcp"></div>
     <div id="chart_div_diaitg"></div>
     <div id="chart_div_firstitg"></div>
+    <div id="chart_div_Aitg"></div>
 </div>
 
 {% endblock %}

@@ -223,6 +223,21 @@ def plots(request, app_name):
         'title': 'Acumulate frequency of IT grade of diameters vs. all other data'
         })
 
+    # Method two
+#     
+    description44, data44, option44 = pf.lists2DescribtionDataOptions (lst_diameter,id1,1)
+    description45, data45, option45 = pf.lists2DescribtionDataOptions (lst_other,id2,2)
+#  
+    description44.update(description45)
+    data44.extend(data45)
+    option44['series'].update(option45['series'])
+    
+    order = tuple(description44.keys())
+
+    data_table44 = gviz_api.DataTable(description44)
+    data_table44.LoadData(data44)
+    json44 = data_table44.ToJSon(columns_order=("xvalue","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
+
     # fifth plot - sorting first run
     
     FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
@@ -244,7 +259,7 @@ def plots(request, app_name):
     lst_firstRunId = [sets.id for sets in FirstRunQuerySet]
     lst_otherid = [sets.id for sets in notFirstRunQuerySet]
     
-    json5 , option5= pf.lists2JsonOptions (lst_firstRunItg,lst_firstRunId,lst_otherItg,lst_otherid)
+    json55 , option55= pf.lists2JsonOptions (lst_firstRunItg,lst_firstRunId,lst_otherItg,lst_otherid)
 
     data5 =[]
 
@@ -260,7 +275,7 @@ def plots(request, app_name):
         data5.append({
             "itg": FirstRunQuerySet[i].itg_pcsl,
             "cum_freq1": FirstRunQuerySet[i].cumFreq,
-            "tooltip1": ("data from No. %s" % FirstRunQuerySet[i].id)
+            "tooltip1": ("data from No. %s" + str(order) )#% FirstRunQuerySet[i].id)
                 })
         
     for i in range(len(notFirstRunQuerySet)):
@@ -329,10 +344,6 @@ def plots(request, app_name):
         'title': 'comparison of acumulated frequency of first production run vs.  all data'
         })
        
-                
-            
-            
-
 
     return render(request, 'analyze/plots.html', 
         {
@@ -348,6 +359,8 @@ def plots(request, app_name):
         'option4' : option4,
         'json5' : mark_safe(json5),
         'option5' : option5,
+        'json44' : mark_safe(json44),
+        'option44' : option44,
         })
 
 
