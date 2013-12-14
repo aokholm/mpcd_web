@@ -1,6 +1,5 @@
 import numpy as np
 import math
-from scipy.stats import norm
 
 """Conversion funciton between ITgrade and Symtolerance - Input Should be in millimeters"""
 	
@@ -41,17 +40,3 @@ def UslLsl2SymTol(USL, LSL):
 def c4stdCorrectionFactor(n):
 	
 	return math.sqrt( 2.0 / (n-1)) * math.gamma(n/2.0) / math.gamma((n-1)/2.0)
-
-def list2cdf (input_data):
-
-	# recieves a list of data, returns a normal distribution fit
-
-	mean = np.mean(input_data)
-	std = np.std(input_data, ddof=1)
-
-	minpos = mean - 3*std
-	maxpos = mean + 3*std
-	x = np.linspace(minpos,maxpos,100).tolist()
-	cdf = [norm.cdf(x[i], loc=mean, scale=std) for i in range(100)]
-
-	return (x, cdf)

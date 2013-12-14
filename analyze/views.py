@@ -7,7 +7,9 @@ from django.db.models import Q
 import numpy as np, math
 from prettytable import PrettyTable
 from scipy.stats import norm
-from analyze.util.plots import Plot
+from analyze.util.plot import Plot
+from analyze.util.plot_functions import list2cdf
+
 
 import gviz_api
 from django.utils.safestring import mark_safe
@@ -50,39 +52,48 @@ def plots(request, app_name):
     diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
     notdiMeasurements = MeasurementSet.objects.filter(~Q(specification_type='DI'))
     
-    lst_diameter = [messet.itg for messet in diMeasurements]
+    lst_diameter = [messet.itg_pcsl for messet in diMeasurements]
     id1 = [messet.id for messet in diMeasurements]
-    lst_other = [messet.itg for messet in notdiMeasurements]
+    lst_other = [messet.itg_pcsl for messet in notdiMeasurements]
     id2 = [messet.id for messet in notdiMeasurements]
-
-    json4 , option4= pf.lists2JsonOptions (lst_diameter,id1,lst_other,id2)
-
-    option4.update({
-        'title': 'Acumulate frequency of IT grade of diameters vs. all other data'
-        })
-
-    # Method two
-#     
-    description44, data44, option44 = pf.lists2DescribtionDataOptions (lst_diameter,id1,1)
-    description45, data45, option45 = pf.lists2DescribtionDataOptions (lst_other,id2,2)
-#  
-    description44.update(description45)
-    data44.extend(data45)
-    option44['series'].update(option45['series'])
     
-    order = tuple(description44.keys())
+    plot4 = Plot()
+    plot4.addList(lst_diameter, id1)
+    plot4.addList(lst_other, id2)
 
-    data_table44 = gviz_api.DataTable(description44)
-    data_table44.LoadData(data44)
-    json44 = data_table44.ToJSon(columns_order=("xvalue","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
+#     json4 , option4= pf.lists2JsonOptions (lst_diameter,id1,lst_other,id2)
+# 
+#     option4.update({
+#         'title': 'Acumulate frequency of IT grade of diameters vs. all other data'
+#         })
+# 
+#     # Method two
+# #     
+#     description44, data44, option44 = pf.lists2DescribtionDataOptions (lst_diameter,id1,1)
+#     description45, data45, option45 = pf.lists2DescribtionDataOptions (lst_other,id2,2)
+# #  
+#     description44.update(description45)
+#     data44.extend(data45)
+#     option44['series'].update(option45['series'])
+#     
+#     order = tuple(description44.keys())
+# 
+#     data_table44 = gviz_api.DataTable(description44)
+#     data_table44.LoadData(data44)
+#     json44 = data_table44.ToJSon(columns_order=("xvalue","cum_freq1","tooltip1","best_fit1","cum_freq2","tooltip2","best_fit2"))
 
     
     # fifth plot - sorting first run
+    FirstRunQuerySet = []
+    notFirstRunQuerySet = []
+    try:
+        FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
+        FirstRunQuerySet = MeasurementSet.objects.filter(generaltag__in = [FirstRunGeneralTag]).order_by('itg_pcsl').distinct()
+        notFirstRunQuerySet = MeasurementSet.objects.filter(~Q(generaltag__in = [FirstRunGeneralTag])).order_by('itg_pcsl').distinct()
+    except:
+        pass
     
-    FirstRunGeneralTag = GeneralTag.objects.get(name = 'First run')
-    
-    FirstRunQuerySet = MeasurementSet.objects.filter(generaltag__in = [FirstRunGeneralTag]).order_by('itg_pcsl').distinct()
-    notFirstRunQuerySet = MeasurementSet.objects.filter(~Q(generaltag__in = [FirstRunGeneralTag])).order_by('itg_pcsl').distinct()
+   
     
     description5 = {
     "itg": ("number" , "IT grade"),
@@ -95,43 +106,44 @@ def plots(request, app_name):
     }
 
     data5 =[]
-
-    def addCumFreqValues(messets):
-        for i in range(len(messets)):
-            messets[i].cumFreq = (i+1)*(1/float(len(messets)+1))
-        
-    addCumFreqValues(FirstRunQuerySet)
-    addCumFreqValues(notFirstRunQuerySet)
     
-    
-    for i in range(len(FirstRunQuerySet)):
-        data5.append({
-            "itg": FirstRunQuerySet[i].itg_pcsl,
-            "cum_freq1": FirstRunQuerySet[i].cumFreq,
-            "tooltip1": ("data from No. %s" + str(order) )#% FirstRunQuerySet[i].id)
-                })
-        
-    for i in range(len(notFirstRunQuerySet)):
-        data5.append({
-            "itg": notFirstRunQuerySet[i].itg_pcsl,
-            "cum_freq2": notFirstRunQuerySet[i].cumFreq,
-            "tooltip2": ("data from No. %s" % notFirstRunQuerySet[i].id)
-                })
-       
-    [xvalue1 , cdfvalue1] = pc.list2cdf([messet.itg_pcsl for messet in FirstRunQuerySet])
-    [xvalue2 , cdfvalue2] = pc.list2cdf([messet.itg_pcsl for messet in notFirstRunQuerySet])
-
-    for i in range(len(xvalue1)):
-        data5.append({
-            "itg": xvalue1[i],
-            "best_fit1": cdfvalue1[i],
-            })
-
-    for i in range(len(xvalue2)):
-        data5.append({
-            "itg": xvalue2[i],
-            "best_fit2": cdfvalue2[i],
-            })
+#     def addCumFreqValues(messets):
+#         for i in range(len(messets)):
+#             messets[i].cumFreq = (i+1)*(1/float(len(messets)+1))
+#     
+#         
+#     addCumFreqValues(FirstRunQuerySet)
+#     addCumFreqValues(notFirstRunQuerySet)
+#     
+#     
+#     for i in range(len(FirstRunQuerySet)):
+#         data5.append({
+#             "itg": FirstRunQuerySet[i].itg_pcsl,
+#             "cum_freq1": FirstRunQuerySet[i].cumFreq,
+#             "tooltip1": ("data from No. %s" + str(order) )#% FirstRunQuerySet[i].id)
+#                 })
+#         
+#     for i in range(len(notFirstRunQuerySet)):
+#         data5.append({
+#             "itg": notFirstRunQuerySet[i].itg_pcsl,
+#             "cum_freq2": notFirstRunQuerySet[i].cumFreq,
+#             "tooltip2": ("data from No. %s" % notFirstRunQuerySet[i].id)
+#                 })
+#        
+#     [xvalue1 , cdfvalue1] = list2cdf([messet.itg_pcsl for messet in FirstRunQuerySet])
+#     [xvalue2 , cdfvalue2] = list2cdf([messet.itg_pcsl for messet in notFirstRunQuerySet])
+# 
+#     for i in range(len(xvalue1)):
+#         data5.append({
+#             "itg": xvalue1[i],
+#             "best_fit1": cdfvalue1[i],
+#             })
+# 
+#     for i in range(len(xvalue2)):
+#         data5.append({
+#             "itg": xvalue2[i],
+#             "best_fit2": cdfvalue2[i],
+#             })
 
     data_table5 = gviz_api.DataTable(description5)
     data_table5.LoadData(data5)
@@ -188,18 +200,16 @@ def plots(request, app_name):
         'option2' : plot2.getOption(),
         'json3' : plot3.getJson(),
         'option3' : plot3.getOption(),
-        'json4' : mark_safe(json4),
-        'option4' : option4,
+        'json4' : plot4.getJson(),
+        'option4' : plot4.getOption(),
         'json5' : mark_safe(json5),
         'option5' : option5,
-        'json44' : mark_safe(json44),
-        'option44' : option44,
         })
 
 
 
 def design(request, app_name):
-    measurements_sets = MeasurementSet.objects.all().prefetch_related('process', 'material')
+    measurements_sets = MeasurementSet.objects.all()
 
     itgrades = sorted([messet.itg_pcsl for messet in measurements_sets])
 

@@ -4,7 +4,7 @@ Created on Dec 13, 2013
 @author: aokholmRetina
 '''
 import numpy as np
-import mesdata.PCfunctions as pc
+from analyze.util.plot_functions import list2cdf
 import gviz_api
 from django.utils.safestring import mark_safe
 
@@ -32,7 +32,7 @@ class Plot:
         }
 
 
-    def addLine (self, xlist, ylist):       
+    def addLine (self, xlist, ylist):    
         y = 'y' + str(self.count)
 
         self.columnOrder.append(y)
@@ -92,6 +92,9 @@ class Plot:
 
     def addList (self, itgrade,id_set):
         
+        if len(itgrade) <= 2:
+            return False
+        
         yvalue = np.linspace(0,1, len(itgrade)).tolist()
         sorted_itgrade, sorted_id = zip(*sorted(zip(itgrade,id_set)))
         
@@ -110,7 +113,7 @@ class Plot:
                 tooltip : ("data from No. %s" % sorted_id[i])
                     })
     
-        [xvalue , cdfvalue] = pc.list2cdf (itgrade)
+        [xvalue , cdfvalue] = list2cdf(itgrade)
     
         for i in range(len(xvalue)):
             self.data.append({
