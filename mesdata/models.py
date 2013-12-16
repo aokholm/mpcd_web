@@ -1,7 +1,7 @@
 from datetime import datetime
-
 from django.db import models
-
+from mesdata.PCfunctions import stdMeanshiftCpk2Symtol, UslLsl2SymTol, c4stdCorrectionFactor, dimSymtol2Itg
+from numpy import mean, std
 
 # Create your models here.
 class Measurement(models.Model):
@@ -63,7 +63,7 @@ class MeasurementReport(models.Model):
 
 
 class MeasurementSet(models.Model):
-    measurement_number = models.CharField(max_length=6)
+    measurement_number = models.CharField(max_length=24)
     count = models.IntegerField('No. Measurements',blank=True, default=0)
     mean = models.FloatField('Mean', blank=True, null=True)
     mean_shift = models.FloatField('Mean Shift', blank=True, null=True)
@@ -84,7 +84,7 @@ class MeasurementSet(models.Model):
 
     measurement_report = models.ForeignKey('mesdata.MeasurementReport', related_name='measurement_sets')
     generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_sets',blank=True,null=True)
-    measurement_equipment = models.ForeignKey('tags.MeasurementEquipment',  related_name='measurement_sets')
+    measurement_equipment = models.ForeignKey('tags.MeasurementEquipment',  related_name='measurement_sets',blank=True,null=True)
     
 
     RADIUS = 'R'
@@ -134,3 +134,31 @@ class MeasurementSet(models.Model):
 
     def __unicode__(self):
         return """Measurement Set %s""" % (self.id)
+    
+    def setPCparameters(self):
+        measurements = [x.actual_size for x in self.measurements.all()]
+        if len(measurements) >= 2:
+            self.count = len(measurements)
+            self.mean = mean(measurements)
+    
+            self.cpk = 1.66
+            self.mean_shift = self.mean - self.target
+            self.std = std(measurements, ddof=1)/c4stdCorrectionFactor(self.count)
+            
+            self.pcsl = stdMeanshiftCpk2Symtol(self.std, self.mean_shift, self.cpk)
+            self.ca_pcsl = 1-abs(self.mean_shift)/ self.pcsl
+            self.itg_pcsl = dimSymtol2Itg(self.target, self.pcsl)
+            
+            if (self.usl != None and self.lsl != None):
+                self.symtol = UslLsl2SymTol( self.usl, self.lsl)
+                self.itg = dimSymtol2Itg(self.target, self.symtol)
+                self.ca = 1 - abs(self.mean_shift) / self.symtol
+                self.cb = self.mean_shift / self.symtol
+                self.cp = self.symtol / (3 * self.std)
+    
+    def save(self, *args, **kwargs):
+        self.setPCparameters()
+        super(MeasurementSet, self).save(*args, **kwargs) # Call the "real" save() method.
+    
+    
+        
