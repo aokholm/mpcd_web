@@ -56,7 +56,6 @@ class MeasurementReport(models.Model):
     pub_date = models.DateTimeField('Date Published',default=datetime.now, blank=False)
     price = models.FloatField('Price per 1000 [$]',blank=True, null=True) 
     weight = models.FloatField('Weight of product [kg]',blank=True, null=True)
-    measured = models.CharField('Measurement ',max_length=200,blank=True, null=True)
     
     def __unicode__(self):
         return str(self.id) + ' ' + self.part_name + ' ' + self.drawingKey

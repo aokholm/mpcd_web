@@ -41,8 +41,12 @@ def batch(request):
                 else:
                     usl = None
                 
+                if measurementsetRaw[4] != '':
+                    specification_type = measurementsetRaw[4]
+                else:
+                    specification_type = None
                 
-                actual_sizes = measurementsetRaw[4:]
+                actual_sizes = measurementsetRaw[5:]
                 try:
                     firstEmptyStringIndex = actual_sizes.index('')
                     actual_sizes = actual_sizes[:firstEmptyStringIndex]
@@ -57,6 +61,7 @@ def batch(request):
                 measurementset.target = target
                 measurementset.lsl = lsl
                 measurementset.usl = usl
+                measurementset.specification_type = specification_type
                 
                 if form.cleaned_data['measurement_equipment'] != None:
                     measurementset.measurement_equipment = form.cleaned_data['measurement_equipment']
@@ -79,7 +84,7 @@ def batch(request):
         return HttpResponseRedirect('thanks/') # Redirect after POST
     else:
         form = BatchImportForm() # An unbound form
-
+        
     return render(request, 'dataimport/batch.html', {
         'form': form,
         'passedmesdataCSV' : measurementsetsRAW,
