@@ -4,14 +4,25 @@ from django import forms
 from mesdata.models import MeasurementReport, Measurement, MeasurementSet
 from tags.models import MeasurementEquipment
 import csv
+from twisted.conch.ls import lsLine
 
 class BatchImportForm(forms.Form):
     mesdataCSV = forms.CharField(widget=forms.Textarea)
     measurement_report = forms.ModelChoiceField(MeasurementReport.objects.all(), empty_label=None)
     measurement_equipment = forms.ModelChoiceField(MeasurementEquipment.objects.all(), empty_label="(Nothing)", required=False)
+    spec_limit_absolute = forms.BooleanField(required=False)
 
 
 app_name = "dataimport"
+
+specificationConvertion = {
+    'Diameter': 'D',
+    'Radius': 'R',
+    'Distance': 'DI',
+    'X Value': 'DI',
+    'Y Value': 'DI',
+    'Z Value': 'DI',
+    }
 
 
 def batch(request):
@@ -59,8 +70,24 @@ def batch(request):
                 measurementset.measurement_number = measurement_number
                 measurementset.measurement_report = form.cleaned_data['measurement_report']
                 measurementset.target = target
-                measurementset.lsl = lsl
-                measurementset.usl = usl
+                
+                # Help if imported had fucked up LSL and USL
+                
+                if lsl > usl:
+                    x = lsl
+                    lsl = usl
+                    usl = x
+                
+                
+                if form.cleaned_data['spec_limit_absolute']:
+                    measurementset.lsl = lsl
+                    measurementset.usl = usl
+                else:
+                    measurementset.lsl = lsl + target
+                    measurementset.usl = usl + target
+                    
+                if specification_type in specificationConvertion.keys():
+                    specification_type = specificationConvertion.get(specification_type)
                 measurementset.specification_type = specification_type
                 
                 if form.cleaned_data['measurement_equipment'] != None:
@@ -80,8 +107,7 @@ def batch(request):
                 
                 measurementset.save()
                 
-                
-        return HttpResponseRedirect('thanks/') # Redirect after POST
+            return HttpResponseRedirect('thanks/') # Redirect after POST
     else:
         form = BatchImportForm() # An unbound form
         

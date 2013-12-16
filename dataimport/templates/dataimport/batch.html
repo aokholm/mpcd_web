@@ -7,6 +7,7 @@
 		</table>
 	<input type="submit" value="Submit" />
 	</form>
+	<br /><br /><br />
 	<h3>Input Format</h3>
 	<p>Measurement identification code, target, lsl (Optional), usl (Optional), specification type (Optional), Measurement * N</p>
 	<pre>
@@ -30,7 +31,7 @@ D	DI	DI
 		2.923783
 		2.9244936
 		2.9289433</pre>
-	
+	<br />
 	<h4>Specification types</h4>
 	<pre>
 RADIUS = 'R'
@@ -53,6 +54,13 @@ CONCENTRICITY = 'CO'
 CIRCULAR_RUNOUT = 'CR'
 TOTAL_RUNOUT = 'TR'
 OTHER = 'O'</pre>
-
+<p>Special conversion rules</p>
+<pre>
+'Diameter': 'D',
+'Radius': 'R',
+'Distance': 'DI',
+'X Value': 'DI',
+'Y Value': 'DI',
+'Z Value': 'DI',</pre>
 
 {% endblock %}
