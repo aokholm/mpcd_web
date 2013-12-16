@@ -19,6 +19,7 @@ class MyAdminSite(admin.AdminSite):
 
         my_urls = patterns('',
             url(r'^(?P<app_name>analyze)/', include('analyze.urls', namespace="analyze")),
+            url(r'^dataimport/', include('dataimport.urls', namespace="dataimport")),
             url(r'^ip$', self.view)
         )
         return my_urls + urls

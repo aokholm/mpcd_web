@@ -1,7 +1,5 @@
 from django.contrib import admin
 from mesdata.models import Measurement, Manufacturer, MeasurementCompany, MeasurementReport
-from mesdata.PCfunctions import stdMeanshiftCpk2Symtol, UslLsl2SymTol, c4stdCorrectionFactor, dimSymtol2Itg
-from numpy import mean, std
 
 # admin MEASUREMENT
 class MeasurementInline(admin.TabularInline):
@@ -53,23 +51,5 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         return super(MeasurementSetAdmin, self).response_change(request, obj)
 
     def after_saving_model_and_related_inlines(self, obj):
-        measurements = [x.actual_size for x in obj.measurements.all()]
-        
-        obj.count = len(measurements)
-        obj.cpk = 1.66
-        obj.mean_shift = obj.target - mean(measurements)
-        obj.std = std(measurements, ddof=1)/c4stdCorrectionFactor(obj.count)
-        
-        obj.pcsl = stdMeanshiftCpk2Symtol(obj.std, obj.mean_shift, obj.cpk)
-        obj.symtol = UslLsl2SymTol( obj.usl, obj.lsl)
-        
-        obj.itg = dimSymtol2Itg(obj.target, obj.symtol)
-        obj.itg_pcsl = dimSymtol2Itg(obj.target, obj.pcsl)
-      
-        obj.ca = 1 - abs(obj.mean_shift) / obj.symtol
-        obj.ca_pcsl = 1-abs(obj.mean_shift)/ obj.pcsl
-        obj.cb = obj.mean_shift / obj.symtol
-        obj.cp = obj.symtol / (3 * obj.std)
-
         obj.save()
         return obj
