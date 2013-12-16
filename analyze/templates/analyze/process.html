@@ -9,13 +9,10 @@
 
         google.setOnLoadCallback(drawTable);
         function drawTable() {
-
-          var json_table = new google.visualization.LineChart(document.getElementById('table_div_json'));
-          var json_data = new google.visualization.DataTable({{json}}, 0.6);
-         
-          var options = {{option|safe}};
-
-          json_table.draw(json_data, options);
+            var itg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_itg'));
+            var itg_data = new google.visualization.DataTable({{json}}, 0.6);
+            var itg_options = {{option|safe}};
+            itg_chart.draw(itg_data, itg_options);
         }
       </script>
 {% endblock %}
@@ -37,7 +34,7 @@
 {% block content %}
 
     <H1>Process Parameters</H1>
-    <div id="table_div_json"></div>
+    <div id="chart_div_itg"></div>
 
     <form method="GET">
     Upper Tolerance: [mm] <input type="text" name="upper" value={{upper}}><br/>

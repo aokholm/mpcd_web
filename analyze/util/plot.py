@@ -4,7 +4,7 @@ Created on Dec 13, 2013
 @author: aokholmRetina
 '''
 import numpy as np
-from analyze.util.plot_functions import list2cdf
+from analyze.util.plot_functions import list2cdf, wilson
 import gviz_api
 from django.utils.safestring import mark_safe
 
@@ -144,6 +144,115 @@ class Plot:
             })
         
         self.count = self.count + 2
+    
+    def addQuerySet (self, QuerySet):
+        
+        cum_freq = 'cum_freq' + str(self.count)
+        tooltip = 'tooltip' + str(self.count)
+        best_fit = 'best_fit' + str(self.count)
+        
+        self.columnOrder.append(cum_freq)
+        self.columnOrder.append(tooltip)
+        self.columnOrder.append(best_fit)
+        
+        for i in range(len(QuerySet)):
+            QuerySet[i].cumFreq = (i+1)*(1/float(len(QuerySet)+1))
+        
+        for i in range(len(QuerySet)):
+            self.data.append({
+                self.xvalues : QuerySet[i].itg_pcsl,
+                cum_freq: QuerySet[i].cumFreq,
+                tooltip : ("data from No. %s" % QuerySet[i].id)
+                    })
+    
+        [xvalue , cdfvalue] = list2cdf([messet.itg_pcsl for messet in QuerySet])
+    
+        for i in range(len(xvalue)):
+            self.data.append({
+                self.xvalues : xvalue[i],
+                best_fit: cdfvalue[i],
+                })
+            
+        self.description.update({
+            cum_freq: ("number" , "cumulative frequency"),
+            tooltip : ("string","Tip1",{"role":"tooltip"}),
+            best_fit : ("number", "best fit")
+            })
+        
+        dots = self.count
+        line = dots + 1
+        
+        self.option['series'].update({# series 0 is the Scatter
+                dots: {
+                    'color' : colorlist[self.count],
+                },
+                line: {
+                    'lineWidth': 2,
+                    'pointSize': 0,
+                    'color': colorlist[self.count],
+                    'enableInteractivity': 'false',
+                    'tooltip': 'none'
+                },
+            })
+        
+        self.count = self.count + 2
+    
+    def addConfidenceInterval (self, itgrade):    
+        
+        if len(itgrade) <= 2:
+            return False
+        
+        conf_uls = 'conf_ul' + str(self.count)
+        conf_lls = 'conf_ll' + str(self.count)
+        
+        self.columnOrder.append(conf_uls)
+        self.columnOrder.append(conf_lls)
+        
+        [xvalue , cdfvalue] = list2cdf(itgrade)       
+        [conf_ul, conf_ll] = wilson([x*len(itgrade) for x in cdfvalue] , len(itgrade) , 0.05)
+
+        for i in range(len(xvalue)):
+            self.data.append({
+                self.xvalues : xvalue[i],
+                conf_uls: conf_ul[i],
+                conf_lls: conf_ll[i],
+                })
+        
+        self.description.update({
+            conf_uls : ("number", "conf_upper"),
+            conf_lls : ("number", "conf_lower")
+            })
+        
+        line1 = self.count
+        line2 = line1 + 1
+        
+        self.option['series'].update({
+                line1: {
+                    'lineWidth': 2,
+                    'pointSize': 0,
+                    'color': colorlist[self.count],
+                    'enableInteractivity': 'false',
+                    'tooltip': 'none'
+                },
+                line2: {
+                    'lineWidth': 2,
+                    'pointSize': 0,
+                    'color': colorlist[self.count],
+                    'enableInteractivity': 'false',
+                    'tooltip': 'none'
+                },
+            })
+        
+        self.count = self.count + 2
+    
+    def updateTitle(self,title):
+        self.option.update({'title': title })
+    
+    def updateXLabel(self,label):    
+        self.option['hAxis'].update({'title': label})
+    
+    def updateYLabel(self,label):  
+        self.option['vAxis'].update({'title': label})
         
     def getOption(self):
         return self.option
