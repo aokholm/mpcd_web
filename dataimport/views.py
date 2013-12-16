@@ -64,7 +64,9 @@ def batch(request):
                     pass
                 
                 actual_sizes = [float(x) for x in actual_sizes]
-
+                if target < 0:
+                    actual_sizes = [-1*x for x in actual_sizes] 
+                
                 measurementset = MeasurementSet()
                 measurementset.measurement_number = measurement_number
                 measurementset.measurement_report = form.cleaned_data['measurement_report']
@@ -76,7 +78,6 @@ def batch(request):
                     x = lsl
                     lsl = usl
                     usl = x
-                
                 
                 if form.cleaned_data['spec_limit_absolute']:
                     measurementset.lsl = lsl
