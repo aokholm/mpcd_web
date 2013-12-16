@@ -4,7 +4,6 @@ from django import forms
 from mesdata.models import MeasurementReport, Measurement, MeasurementSet
 from tags.models import MeasurementEquipment
 import csv
-from twisted.conch.ls import lsLine
 
 class BatchImportForm(forms.Form):
     mesdataCSV = forms.CharField(widget=forms.Textarea)
