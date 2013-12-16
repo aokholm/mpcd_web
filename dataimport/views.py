@@ -64,7 +64,11 @@ def batch(request):
                     pass
                 
                 actual_sizes = [float(x) for x in actual_sizes]
+                
                 if target < 0:
+                    lsl = -1 * lsl
+                    usl = -1 * usl
+                    target = -1 * target 
                     actual_sizes = [-1*x for x in actual_sizes] 
                 
                 measurementset = MeasurementSet()
