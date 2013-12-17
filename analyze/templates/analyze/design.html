@@ -34,7 +34,15 @@
    <div class="g-d-c">
          <H1>Tolerance Selection</H1>
         <div id="chart_div_json"></div>
-
+		
+		
+		<form action="./" method="post">{% csrf_token %}
+			<table>
+				{{ form.as_table }}
+			</table>
+		<input type="submit" value="Submit" />
+		</form>
+		<br />
         <form method="GET">
         Nominal size [mm]: <input type="text" name="nominalsize" value={{nominalsize}}><br/>
         <input type="submit" value="Update graph" />

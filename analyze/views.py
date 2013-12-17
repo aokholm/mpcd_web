@@ -87,53 +87,6 @@ def plots(request, app_name):
 
 
 
-def design(request, app_name):
-    measurements_sets = MeasurementSet.objects.all()
-
-    itg =[messet.itg_pcsl for messet in measurements_sets]
-    id_s =  [messet.id for messet in measurements_sets]
-    
-    itgrade = []
-    id_set = []
-    
-    for i in range(len(itg)):
-        if itg[i] <= 18:
-            if 1 <= itg[i]:
-                itgrade.append(itg[i])  
-                id_set.append(id_s[i])
-            
-    nominalsize = ""
-    if request.GET.get('nominalsize'):
-        nominalsize = float(request.GET.get('nominalsize'))
-
-    if nominalsize == "":
-        micro_nomsize = 0
-        input_data = itgrade
-    else:
-        micro_nomsize = 1
-        # Change to tolerance
-        input_data = []
-        for x in range(len(itgrade)):
-            input_data.append(dimItg2Symtol(nominalsize,itgrade[x]))
-    
-    plot1 = Plot()
-    plot1.addList(input_data,id_set)
-    plot1.addConfidenceInterval(input_data)
-    
-    if micro_nomsize:
-        plot1.updateXLabel('Tolerance (mm)')
-    
-
-    return render(request, 'analyze/design.html', 
-        {
-            'app_label': app_name,
-            'view_label': 'design',
-            'measurement_sets': measurements_sets,
-            'json' : plot1.getJson(),
-            'option' : plot1.getOption(),
-            'nominalsize' : nominalsize
-
-        })
 
 def process(request, app_name):
     
