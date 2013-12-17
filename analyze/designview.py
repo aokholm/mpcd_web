@@ -8,6 +8,8 @@ from mesdata.PCfunctions import dimItg2Symtol
 from django.shortcuts import render
 from analyze.util.plot import Plot
 from django import forms
+from django.db.models import Q
+
 
 
 class DesignForm(forms.Form):
@@ -26,7 +28,7 @@ def design(request, app_name):
         form = DesignForm() # An unbound form
         
     
-    measurements_sets = MeasurementSet.objects.all().filter(ignore=False)
+    measurements_sets = MeasurementSet.objects.all().filter(ignore=False).filter(Q(specification_type='R') | Q(specification_type='D'))
 
     itgrade =[messet.itg_pcsl for messet in measurements_sets]
     id_set =  [messet.id for messet in measurements_sets]
