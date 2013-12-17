@@ -40,6 +40,7 @@ admin_site.register(Material, MaterialAdmin)
 admin_site.register(Process, ProcessAdmin)
 admin_site.register(GeneralTag, GeneralTagAdmin)
 admin_site.register(MeasurementEquipment, GeneralTagAdmin)
+admin_site.register(MeasurementReportTag)
 
 
 

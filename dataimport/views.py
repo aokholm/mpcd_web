@@ -54,7 +54,7 @@ def batch(request):
                 if measurementsetRaw[4] != '':
                     specification_type = measurementsetRaw[4]
                 else:
-                    specification_type = None
+                    specification_type = 'O'
                 
                 actual_sizes = measurementsetRaw[5:]
                 try:
