@@ -43,10 +43,11 @@ class MeasurementReport(models.Model):
     part_name = models.CharField('Part Name', max_length=60)
     drawingKey = models.CharField('Drawing Key', max_length = 60, unique=True, blank = True, null= True)
     
-    material = models.ForeignKey('tags.Material', related_name='measurement_sets')
+    material = models.ForeignKey('tags.Material', related_name='measurement_reports')
     material.allow_tags = True
-    process = models.ForeignKey('tags.Process',related_name='measurement_sets')
-    
+    process = models.ForeignKey('tags.Process',related_name='measurement_reports')
+    generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_reports',blank=True,null=True)
+
     manufacturer = models.ForeignKey('mesdata.Manufacturer', related_name='measurement_sets', blank=True,null=True)
     measurementCompany = models.ForeignKey('mesdata.MeasurementCompany', related_name='measurement_sets', blank=True,null=True)
     
