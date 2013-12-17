@@ -17,7 +17,7 @@ def index(request, app_name):
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
 def plots(request, app_name):
-    measurements_sets = MeasurementSet.objects.all()
+    measurements_sets = MeasurementSet.objects.all().filter(ignore=False)
 
     id_set = [messet.id for messet in measurements_sets]
     itgrade = [messet.itg_pcsl for messet in measurements_sets]
@@ -90,7 +90,7 @@ def plots(request, app_name):
 
 def process(request, app_name):
     
-    measurements_sets = MeasurementSet.objects.all()
+    measurements_sets = MeasurementSet.objects.all().filter(ignore=False)
 
     upper = 0.4
     lower = -0.4
