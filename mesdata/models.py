@@ -46,8 +46,8 @@ class MeasurementReport(models.Model):
     material = models.ForeignKey('tags.Material', related_name='measurement_reports')
     material.allow_tags = True
     process = models.ForeignKey('tags.Process',related_name='measurement_reports')
-    generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_reports',blank=True,null=True)
-
+    tags = models.ManyToManyField('tags.MeasurementReportTag', related_name='measurement_reports',blank=True,null=True)
+    
     manufacturer = models.ForeignKey('mesdata.Manufacturer', related_name='measurement_sets', blank=True,null=True)
     measurementCompany = models.ForeignKey('mesdata.MeasurementCompany', related_name='measurement_sets', blank=True,null=True)
     
@@ -59,7 +59,7 @@ class MeasurementReport(models.Model):
     weight = models.FloatField('Weight of product [kg]',blank=True, null=True)
     
     def __unicode__(self):
-        return str(self.id) + ' ' + self.part_name + ' ' + self.drawingKey
+        return self.part_name + ' ' + self.drawingKey
 
 
 class MeasurementSet(models.Model):

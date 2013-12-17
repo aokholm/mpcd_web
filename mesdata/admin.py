@@ -1,5 +1,6 @@
 from django.contrib import admin
-from mesdata.models import Measurement, Manufacturer, MeasurementCompany, MeasurementReport
+from mesdata.models import Measurement, Manufacturer, MeasurementCompany, MeasurementReport,\
+    MeasurementSet
 
 # admin MEASUREMENT
 class MeasurementInline(admin.TabularInline):
@@ -13,28 +14,33 @@ class ManufacturerAdmin(admin.ModelAdmin):
 class MeasurementCompanyAdmin(admin.ModelAdmin):
     model = MeasurementCompany
 
-class MeasurementSetAdmin(admin.ModelAdmin):
-    raw_id_fields = ('generaltag','measurement_equipment',)
+class MeasurementSetInline(admin.TabularInline):
+    classes = ('grp-collapse grp-open',)
+    model = MeasurementSet
+    extra = 0
+    fields = ('measurement_number', 'measurement_equipment', 'generaltag', 'specification_type')
+    
+class MeasurementReportAdmin(admin.ModelAdmin):
+    inlines = (MeasurementSetInline, )
 
-    autocomplete_lookup_fields = {
-        'fk' : ['measurement_equipment'],
-        'm2m' : ['generaltag'],
-    }
+class MeasurementSetAdmin(admin.ModelAdmin):
+#     raw_id_fields = ('generaltag','measurement_equipment',)
+
+#     autocomplete_lookup_fields = {
+#         'fk' : ['measurement_equipment'],
+#         'm2m' : ['generaltag'],
+#     }
 
     readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
-    list_display = ('id', 'measurement_report', 'measurement_number', 'target', 'count','specification_type')
+    list_display = ('id', 'measurement_report', 'measurement_number', 'target', 'count','specification_type',)
     search_fields = ['id','measurement_report__material__name', 'measurement_report__process__name', 'generaltag__name', 'equipment__name']
-    list_filter = [ ]
+    list_filter = ['measurement_report', ]
 
     fieldsets = [
         (None,   {
             'classes': ('grp-collapse grp-open',),
-            'fields': ['measurement_report', 'measurement_number', 'measurement_equipment','generaltag','specification_type','target', 'usl','lsl']
+            'fields': ['measurement_report', 'measurement_number', 'measurement_equipment','generaltag', 'specification_type','target', 'usl','lsl']
         }),
-#         ('Additional information', {
-#             'classes': ('grp-collapse grp-open',),
-#             'fields': ['price','weight','manufac','measured','machine','pro_yield']
-#         }),
         ('Process capability information', {
             'classes': ('grp-collapse grp-closed',),
             'fields': ['ca','ca_pcsl','cb','cp','itg','itg_pcsl']

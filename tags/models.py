@@ -26,7 +26,9 @@ class Material(MPTTModel):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     
     def __unicode__(self):
-        return self.name
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        return indent_string + ' ' + self.name
 
     def alternative_names_(self):
         lst = [x.name for x in self.material_names.all()]
@@ -64,8 +66,10 @@ class Process(MPTTModel):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     
     def __unicode__(self):
-        return self.name
-
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        return indent_string + ' ' + self.name
+    
     def alternative_names_(self):
         lst = [x.name for x in self.process_names.all()]
         return str(join(lst, ', '))
@@ -100,7 +104,9 @@ class GeneralTag(MPTTModel):
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     
     def __unicode__(self):
-        return self.name
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        return indent_string + ' ' + self.name
 
     class MPTTMeta:
         order_insertion_by = ['name']
@@ -119,13 +125,42 @@ class GeneralTag(MPTTModel):
             children = ""
 
         return u"%s %s%s" % (indent_string, self.name, children)
+    
+class MeasurementReportTag(MPTTModel):
+    name = models.CharField(max_length=60, unique=True)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
+     
+    def __unicode__(self):
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        return indent_string + ' ' + self.name
+ 
+    class MPTTMeta:
+        order_insertion_by = ['name']
+ 
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("name__icontains", ) # "process_names__name__icontains"
+ 
+    def related_label(self):
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        children = (self.rght - self.lft-1)/2
+        if children:
+            children = u" - %s sub tags" % (children)
+        else:
+            children = ""
+ 
+        return u"%s %s%s" % (indent_string, self.name, children)
 
 class MeasurementEquipment(MPTTModel):
     name = models.CharField(max_length=60, unique=True)
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     
     def __unicode__(self):
-        return self.name
+        indents = '-' * self.level
+        indent_string = ' '.join(indents)
+        return indent_string + ' ' + self.name
 
     class MPTTMeta:
         order_insertion_by = ['name']

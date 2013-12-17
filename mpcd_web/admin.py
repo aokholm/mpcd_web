@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 
 from mesdata.models import MeasurementSet, Manufacturer, MeasurementCompany, MeasurementReport
-from mesdata.admin import MeasurementSetAdmin, ManufacturerAdmin, MeasurementCompanyAdmin
+from mesdata.admin import MeasurementSetAdmin, ManufacturerAdmin, MeasurementCompanyAdmin, MeasurementReportAdmin
 from tags.models import *
 from tags.admin import *
 
@@ -33,7 +33,7 @@ admin_site = MyAdminSite('myadmin')
 admin_site.register(MeasurementSet,MeasurementSetAdmin)
 admin_site.register(Manufacturer, ManufacturerAdmin)
 admin_site.register(MeasurementCompany, MeasurementCompanyAdmin)
-admin_site.register(MeasurementReport)
+admin_site.register(MeasurementReport, MeasurementReportAdmin)
 
 
 admin_site.register(Material, MaterialAdmin)
