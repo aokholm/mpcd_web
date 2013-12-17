@@ -26,19 +26,10 @@ def design(request, app_name):
         form = DesignForm() # An unbound form
         
     
-    measurements_sets = MeasurementSet.objects.all()
+    measurements_sets = MeasurementSet.objects.all().filter(ignore=False)
 
-    itg =[messet.itg_pcsl for messet in measurements_sets]
-    id_s =  [messet.id for messet in measurements_sets]
-    
-    itgrade = []
-    id_set = []
-    
-    for i in range(len(itg)):
-        if itg[i] <= 18:
-            if 1 <= itg[i]:
-                itgrade.append(itg[i])  
-                id_set.append(id_s[i])
+    itgrade =[messet.itg_pcsl for messet in measurements_sets]
+    id_set =  [messet.id for messet in measurements_sets]
             
     nominalsize = ""
     if request.GET.get('nominalsize'):
