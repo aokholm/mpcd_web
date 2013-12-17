@@ -18,7 +18,7 @@ class MeasurementSetInline(admin.TabularInline):
     classes = ('grp-collapse grp-open',)
     model = MeasurementSet
     extra = 0
-    fields = ('measurement_number', 'measurement_equipment', 'generaltag', 'specification_type')
+    fields = ('measurement_number', 'ignore', 'measurement_equipment', 'generaltag', 'specification_type')
     
 class MeasurementReportAdmin(admin.ModelAdmin):
     inlines = (MeasurementSetInline, )

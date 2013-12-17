@@ -81,6 +81,8 @@ class MeasurementSet(models.Model):
     usl = models.FloatField('Upper tolerance',blank=True, null=True)
     lsl = models.FloatField('Lower tolerance',blank=True, null=True)
     symtol = models.FloatField('Symmetric tolerance', blank=True, null=True)
+    
+    ignore = models.BooleanField('Ignore Measurement', default=False)
 
     measurement_report = models.ForeignKey('mesdata.MeasurementReport', related_name='measurement_sets')
     generaltag = models.ManyToManyField('tags.GeneralTag',verbose_name='General Tag',related_name='measurement_sets',blank=True,null=True)
