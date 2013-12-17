@@ -17,16 +17,23 @@ def index(request, app_name):
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
 def plots(request, app_name):
-    measurements_sets = MeasurementSet.objects.all().filter(ignore=False)
-
+    measurements_sets = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
+    selected_sets = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
+    
+    id_sets = [messet.id for messet in selected_sets]
+    itgrades = [messet.itg_pcsl for messet in selected_sets]
+    itgrade_specs = [messet.itg for messet in selected_sets]
+     
+     
     id_set = [messet.id for messet in measurements_sets]
     itgrade = [messet.itg_pcsl for messet in measurements_sets]
     itgrade_spec = [messet.itg for messet in measurements_sets]
-    cp = [messet.cp for messet in measurements_sets]
+    
 
     # FIRST PLOT - ITG vs. ITG SPEC
     plot1 = Plot()
     plot1.addDots(itgrade,itgrade_spec,id_set)
+    plot1.addDots(itgrades,itgrade_specs,id_sets)
     plot1.addLine([8, 15],[8,15])
     plot1.updateXLabel('Tolerance (IT grade)')
     plot1.updateYLabel('Specified tolerance (ITgrade)')
@@ -34,14 +41,23 @@ def plots(request, app_name):
     # SECOND PLOT - ITG ALL
     plot2 = Plot()
     plot2.addList(itgrade,id_set)
+    plot2.addList(itgrades,id_sets)
     plot2.getValues()    
 
     # Third PLOT - CP ALL
-    plot3 = Plot()
-    plot3.addDots(id_set,cp,id_set)    
+    cps = [messet.cp for messet in selected_sets]
+    cp = [messet.cp for messet in measurements_sets]
     
+    plot3 = Plot()
+    plot3.addDots(id_set,cp,id_set)
+    plot3.addDots(id_sets,cps,id_sets)    
     
     # Fourth plot - sorting ITG for diameter
+    cbs = [messet.cb for messet in selected_sets]
+    cb = [messet.cb for messet in measurements_sets]
+    
+    
+    
     
 #     diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
 #     notdiMeasurements = MeasurementSet.objects.filter(~Q(specification_type='DI'))
