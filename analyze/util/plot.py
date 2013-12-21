@@ -145,57 +145,65 @@ class Plot:
         
         self.count = self.count + 2
     
-    def addQuerySet (self, QuerySet):
+    def addQuerySet (self, messets, xvalue='itg_pcsl', addConfLines=True):
         
-        cum_freq = 'cum_freq' + str(self.count)
-        tooltip = 'tooltip' + str(self.count)
-        best_fit = 'best_fit' + str(self.count)
+        xvalues = [getattr(messet, xvalue) for messet in messets]
+        ids =  [messet.id for messet in messets]
         
-        self.columnOrder.append(cum_freq)
-        self.columnOrder.append(tooltip)
-        self.columnOrder.append(best_fit)
+        self.addList(xvalues, ids)
         
-        for i in range(len(QuerySet)):
-            QuerySet[i].cumFreq = (i+1)*(1/float(len(QuerySet)+1))
+        if addConfLines:
+            self.addConfidenceInterval(xvalues)
         
-        for i in range(len(QuerySet)):
-            self.data.append({
-                self.xvalues : QuerySet[i].itg_pcsl,
-                cum_freq: QuerySet[i].cumFreq,
-                tooltip : ("data from No. %s" % QuerySet[i].id)
-                    })
-    
-        [xvalue , cdfvalue] = list2cdf([messet.itg_pcsl for messet in QuerySet])
-    
-        for i in range(len(xvalue)):
-            self.data.append({
-                self.xvalues : xvalue[i],
-                best_fit: cdfvalue[i],
-                })
-            
-        self.description.update({
-            cum_freq: ("number" , "cumulative frequency"),
-            tooltip : ("string","Tip1",{"role":"tooltip"}),
-            best_fit : ("number", "best fit")
-            })
-        
-        dots = self.count
-        line = dots + 1
-        
-        self.option['series'].update({# series 0 is the Scatter
-                dots: {
-                    'color' : colorlist[self.count],
-                },
-                line: {
-                    'lineWidth': 2,
-                    'pointSize': 0,
-                    'color': colorlist[self.count],
-                    'enableInteractivity': 'false',
-                    'tooltip': 'none'
-                },
-            })
-        
-        self.count = self.count + 2
+#         cum_freq = 'cum_freq' + str(self.count)
+#         tooltip = 'tooltip' + str(self.count)
+#         best_fit = 'best_fit' + str(self.count)
+#         
+#         self.columnOrder.append(cum_freq)
+#         self.columnOrder.append(tooltip)
+#         self.columnOrder.append(best_fit)
+#         
+#         for i in range(len(QuerySet)):
+#             QuerySet[i].cumFreq = (i+1)*(1/float(len(QuerySet)+1))
+#         
+#         for i in range(len(QuerySet)):
+#             self.data.append({
+#                 self.xvalues : QuerySet[i].itg_pcsl,
+#                 cum_freq: QuerySet[i].cumFreq,
+#                 tooltip : ("data from No. %s" % QuerySet[i].id)
+#                     })
+#     
+#         [xvalue , cdfvalue] = list2cdf([messet.itg_pcsl for messet in QuerySet])
+#     
+#         for i in range(len(xvalue)):
+#             self.data.append({
+#                 self.xvalues : xvalue[i],
+#                 best_fit: cdfvalue[i],
+#                 })
+#             
+#         self.description.update({
+#             cum_freq: ("number" , "cumulative frequency"),
+#             tooltip : ("string","Tip1",{"role":"tooltip"}),
+#             best_fit : ("number", "best fit")
+#             })
+#         
+#         dots = self.count
+#         line = dots + 1
+#         
+#         self.option['series'].update({# series 0 is the Scatter
+#                 dots: {
+#                     'color' : colorlist[self.count],
+#                 },
+#                 line: {
+#                     'lineWidth': 2,
+#                     'pointSize': 0,
+#                     'color': colorlist[self.count],
+#                     'enableInteractivity': 'false',
+#                     'tooltip': 'none'
+#                 },
+#             })
+#         
+#         self.count = self.count + 2
     
     def addConfidenceInterval (self, itgrade):    
         
