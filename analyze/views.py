@@ -3,7 +3,6 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 from prettytable import PrettyTable
 from analyze.util.plot import Plot
-from mesdata.PCfunctions import dimItg2Symtol
 
 from django.db.models import Q
 from tags.models import GeneralTag
@@ -56,6 +55,79 @@ def plots(request, app_name):
     cbs = [messet.cb for messet in selected_sets]
     cb = [messet.cb for messet in measurements_sets]
     
+    plot4 = Plot()
+    plot4.addList(cb, id_set)
+    plot4.addList(cbs, id_sets)
+    plot4.updateXLabel('Cb normalised mean shift')
+    
+    # Fifth plot - sorting 
+    
+    DI_sel_sets =  selected_sets.filter(specification_type='DI')
+    DI_mea_sets =  measurements_sets.filter(specification_type='DI')
+    
+    DI_itgs = [messet.itg_pcsl for messet in DI_sel_sets]
+    DI_itg = [messet.itg_pcsl for messet in DI_mea_sets]
+    DI_ids = [messet.id for messet in DI_sel_sets]
+    DI_id = [messet.id for messet in DI_mea_sets]
+    
+    plot5 = Plot()
+    plot5.addList(DI_itg,DI_id)
+    plot5.addList(DI_itgs, DI_ids)
+    plot5.updateTitle('For Linear measurements only')
+    
+    # Diameters or radius
+    
+    DR_sel_sets = selected_sets.filter(Q(specification_type='R') | Q(specification_type='D')) 
+    DR_mea_sets = measurements_sets.filter(Q(specification_type='R') | Q(specification_type='D'))
+    
+    DR_itgs = [messet.itg_pcsl for messet in DR_sel_sets]
+    DR_itg = [messet.itg_pcsl for messet in DR_mea_sets]
+    DR_cbs = [messet.cb for messet in DR_sel_sets]
+    DR_cb = [messet.cb for messet in DR_mea_sets]
+    DR_ids = [messet.id for messet in DR_sel_sets]
+    DR_id = [messet.id for messet in DR_mea_sets]
+    
+    
+    plot6 = Plot()
+    plot6.addList(DR_itg, DR_id)
+    plot6.addList(DR_itgs, DR_ids)
+    plot6.updateTitle('Diameters and radius')
+    
+    
+    plot7 = Plot()
+    plot7.addList(DR_cb, DR_id)
+    plot7.addList(DR_cbs, DR_ids)
+    plot7.updateXLabel('CB')
+    
+    # inside outside
+     
+    in_sel_sets = []
+    in_mea_sets = []
+    out_sel_sets = []
+    out_mea_sets = []
+    
+    try:
+        inside_GT = GeneralTag.objects.get(pk = 5)
+#         in_sel_sets = selected_sets.filter(generaltag__in = [inside_GT]).distinct()
+        in_mea_sets = measurements_sets.filter(generaltag__in = [inside_GT]).distinct()
+        outside_GT = GeneralTag.objects.get(name = 'outside(shaft)')
+#         out_sel_sets = selected_sets.filter(generaltag__in = [outside_GT]).distinct()
+        out_mea_sets = measurements_sets.filter(generaltag__in = [outside_GT]).distinct()
+    except:
+        pass
+    
+#     in_cbs = [messet.cb for messet in in_sel_sets]
+    in_cb = [messet.cb for messet in in_mea_sets]
+#     in_ids = [messet.id for messet in in_sel_sets]
+    in_id = [messet.id for messet in in_mea_sets]
+    
+    plot8 = Plot()
+    plot8.addList(in_cb, in_id)
+#     plot8.addList(in_cbs, in_ids)
+    plot8.updateXLabel('CB')
+    
+    
+    
     
     
     
@@ -95,10 +167,16 @@ def plots(request, app_name):
         'option2' : plot2.getOption(),
         'json3' : plot3.getJson(),
         'option3' : plot3.getOption(),
-#         'json4' : plot4.getJson(),
-#         'option4' : plot4.getOption(),
-#         'json5' : mark_safe(json5),
-#         'option5' : option5,
+        'json4' : plot4.getJson(),
+        'option4' : plot4.getOption(),
+        'json5' : plot5.getJson(),
+        'option5' : plot5.getOption(),
+        'json6' : plot6.getJson(),
+        'option6' : plot6.getOption(),
+        'json7' : plot7.getJson(),
+        'option7' : plot7.getOption(),
+        'json8' : plot8.getJson(),
+        'option8' : plot8.getOption(),
         })
 
 
