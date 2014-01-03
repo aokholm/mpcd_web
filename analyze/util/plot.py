@@ -13,138 +13,95 @@ colorlist = ["#3366cc","#dc3912","#ff9900","#109618","#990099","#0099c6","#dd447
 class Plot:
     
     def __init__(self):
-        self.xvalues = "xvalues" 
+        self.xvalues = "xval" 
         self.columnOrder = [self.xvalues]
-        self.description = {self.xvalues: ("number" , "itgrade")}
+        self.description = {self.xvalues: ("number" , "xval")}
         self.data =[]
-        self.count = 0
+        self.seriesIndex = 0
+        self.colorIndex = 0
         self.option = {
-            'title': 'Acumulated frequency of IT grade for all data',
+            'title': 'title',
             'vAxis': {
-                'title': 'Probability',
+                'title': 'x-axis',
             },
             'hAxis': {
-                'title': 'Tolerance (IT grade)',
+                'title': 'y-axis',
             },
-            'legend': 'none',
+            #'legend': 'none',
             'series': {  
             },
             'height': 400,
+            'pointSize': 2,
         }
-
-
-    def addLine (self, xlist, ylist):    
-        y = 'y' + str(self.count)
-
-        self.columnOrder.append(y)
+    
+    
+    def addSeries (self, xlist, ylist, ids=None, line=False, legend=None):
+        
+        yListId = 'yval' + str(self.seriesIndex)
+        self.columnOrder.append(yListId)
+        if ids:
+            yListToolId = 'yvaltool' + str(self.seriesIndex)
+            self.columnOrder.append(yListToolId)
         
         for i in range(len(xlist)):
-            self.data.append({
-                self.xvalues: xlist[i],
-                y : ylist[i],
-                })
-
-        self.description.update({
-            y: ("number" , "yposition"),
-            })
+            row = { self.xvalues: xlist[i],
+                   yListId : ylist[i],}
+            if ids:
+                row[yListToolId] = "Set No: %s" % ids[i]
+            self.data.append(row)    
+        
+        descriptionString = legend if legend else "yval"
+                
+        self.description[yListId] = ("number" , descriptionString)
+        if ids:
+            self.description[yListToolId] = ("string","Tip1",{"role":"tooltip"})
+       
+        seriesOptions = {
+            'color': colorlist[self.colorIndex],
+            'visibleInLegend': 'false',
+            }
          
-        line = self.count
-        
-        self.option['series'].update({# series 0 is the Scatter
-                line: {
-                    'lineWidth': 2,
-                    'pointSize': 0,
-                    'color': colorlist[self.count],
-                    'enableInteractivity': 'false',
-                    'tooltip': 'none'
-                    },
-                                      })
-        
-        self.count = self.count + 1
-
-    def addDots (self, xlist, ylist, id_set):       
-        ypos = 'ypos' + str(self.count)
-        ypostool = 'ypostool' + str(self.count)
-
-        self.columnOrder.append(ypos)
-        self.columnOrder.append(ypostool)
-
-        for i in range(len(id_set)):
-            self.data.append({
-                self.xvalues: xlist[i],
-                ypos : ylist[i],
-                ypostool: ("data from No. %s" % id_set[i])
-                })
-
-        self.description.update({
-            ypos: ("number" , "yposition"),
-            ypostool : ("string","Tip1",{"role":"tooltip"}),
-            })
+        if not ids:
+            seriesOptions['tooltip'] = 'none'
+            seriesOptions['enableInteractivity'] = 'false'
          
-        dots = self.count
-        
-        self.option['series'].update({# series 0 is the Scatter
-                dots: {
-                    'color' : colorlist[self.count],
-                    },
-                })
-        
-        self.count = self.count + 1
+        if line:
+            seriesOptions['lineWidth'] = 2
+            seriesOptions['pointSize'] = 0
 
-    def addList (self, itgrade,id_set):
+        if legend:
+            seriesOptions['visibleInLegend'] = 'true'
         
-        if len(itgrade) <= 2:
+        self.option['series'][self.seriesIndex] = seriesOptions
+        
+        self.seriesIndex = self.seriesIndex + 1
+        self.colorIndex = self.colorIndex + 1
+    
+    
+    def addLine (self, xlist, ylist, **kwargs):    
+        
+        self.addSeries(xlist, ylist, line=True, **kwargs)
+        
+
+    def addDots (self, xlist, ylist, ids, **kwargs):
+        
+        self.addSeries(xlist, ylist, ids=ids, **kwargs)
+
+
+    def addList (self, distList, id_set, **kwargs):
+        
+        if len(distList) <= 2:
             return False
         
-        yvalue = np.linspace(0,1, len(itgrade)).tolist()
-        sorted_itgrade, sorted_id = zip(*sorted(zip(itgrade,id_set)))
+        sorted_itgrade, sorted_id = zip(*sorted(zip(distList,id_set)))
+        cumFreq = [(i+1)*(1/float(len(distList)+1)) for i in range(len(distList))]
+        self.addDots(sorted_itgrade, cumFreq, sorted_id, **kwargs)
+        self.colorIndex = self.colorIndex -1
         
-        cum_freq = 'cum_freq' + str(self.count)
-        tooltip = 'tooltip' + str(self.count)
-        best_fit = 'best_fit' + str(self.count)
-        
-        self.columnOrder.append(cum_freq)
-        self.columnOrder.append(tooltip)
-        self.columnOrder.append(best_fit)
-        
-        for i in range(len(id_set)):
-            self.data.append({
-                self.xvalues : sorted_itgrade[i],
-                cum_freq: yvalue[i],
-                tooltip : ("data from No. %s" % sorted_id[i])
-                    })
-    
-        [xvalue , cdfvalue] = list2cdf(itgrade)
-    
-        for i in range(len(xvalue)):
-            self.data.append({
-                self.xvalues : xvalue[i],
-                best_fit: cdfvalue[i],
-                })
-            
-        self.description.update({
-            cum_freq: ("number" , "cumulative frequency"),
-            tooltip : ("string","Tip1",{"role":"tooltip"}),
-            best_fit : ("number", "best fit")
-            })
-        
-        dots = self.count
-        line = dots + 1
-        
-        self.option['series'].update({# series 0 is the Scatter
-                dots: {
-                    'color' : colorlist[self.count],
-                },
-                line: {
-                    'lineWidth': 2,
-                    'pointSize': 0,
-                    'color': colorlist[self.count],
-                    'enableInteractivity': 'false',
-                    'tooltip': 'none'
-                },
-            })
-        
-        self.count = self.count + 2
+        [xvalue , cdfvalue] = list2cdf(distList)
+        self.addLine(xvalue, cdfvalue)
+         
+
     
     def addQuerySet (self, messets, xvalue='itg_pcsl', addConfLines=True):
         
@@ -156,63 +113,15 @@ class Plot:
         if addConfLines:
             self.addConfidenceInterval(xvalues)
         
-#         cum_freq = 'cum_freq' + str(self.count)
-#         tooltip = 'tooltip' + str(self.count)
-#         best_fit = 'best_fit' + str(self.count)
-#         
-#         self.columnOrder.append(cum_freq)
-#         self.columnOrder.append(tooltip)
-#         self.columnOrder.append(best_fit)
-#         
-#         for i in range(len(QuerySet)):
-#             QuerySet[i].cumFreq = (i+1)*(1/float(len(QuerySet)+1))
-#         
-#         for i in range(len(QuerySet)):
-#             self.data.append({
-#                 self.xvalues : QuerySet[i].itg_pcsl,
-#                 cum_freq: QuerySet[i].cumFreq,
-#                 tooltip : ("data from No. %s" % QuerySet[i].id)
-#                     })
-#     
-#         [xvalue , cdfvalue] = list2cdf([messet.itg_pcsl for messet in QuerySet])
-#     
-#         for i in range(len(xvalue)):
-#             self.data.append({
-#                 self.xvalues : xvalue[i],
-#                 best_fit: cdfvalue[i],
-#                 })
-#             
-#         self.description.update({
-#             cum_freq: ("number" , "cumulative frequency"),
-#             tooltip : ("string","Tip1",{"role":"tooltip"}),
-#             best_fit : ("number", "best fit")
-#             })
-#         
-#         dots = self.count
-#         line = dots + 1
-#         
-#         self.option['series'].update({# series 0 is the Scatter
-#                 dots: {
-#                     'color' : colorlist[self.count],
-#                 },
-#                 line: {
-#                     'lineWidth': 2,
-#                     'pointSize': 0,
-#                     'color': colorlist[self.count],
-#                     'enableInteractivity': 'false',
-#                     'tooltip': 'none'
-#                 },
-#             })
-#         
-#         self.count = self.count + 2
+
     
     def addConfidenceInterval (self, itgrade):    
         
         if len(itgrade) <= 2:
             return False
         
-        conf_uls = 'conf_ul' + str(self.count)
-        conf_lls = 'conf_ll' + str(self.count)
+        conf_uls = 'conf_ul' + str(self.seriesIndex)
+        conf_lls = 'conf_ll' + str(self.seriesIndex)
         
         self.columnOrder.append(conf_uls)
         self.columnOrder.append(conf_lls)
@@ -232,27 +141,31 @@ class Plot:
             conf_lls : ("number", "conf_lower")
             })
         
-        line1 = self.count
+        line1 = self.seriesIndex
         line2 = line1 + 1
         
         self.option['series'].update({
                 line1: {
                     'lineWidth': 2,
                     'pointSize': 0,
-                    'color': colorlist[self.count],
+                    'color': colorlist[self.seriesIndex],
                     'enableInteractivity': 'false',
                     'tooltip': 'none'
                 },
                 line2: {
                     'lineWidth': 2,
                     'pointSize': 0,
-                    'color': colorlist[self.count],
+                    'color': colorlist[self.seriesIndex],
                     'enableInteractivity': 'false',
                     'tooltip': 'none'
                 },
             })
         
-        self.count = self.count + 2
+        self.seriesIndex = self.seriesIndex + 2
+    
+    
+    
+    
     
     def updateTitle(self,title):
         self.option.update({'title': title })

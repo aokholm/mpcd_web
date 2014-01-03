@@ -16,54 +16,57 @@ def index(request, app_name):
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
 def plots(request, app_name):
-    measurements_sets = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
-    selected_sets = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
+    measurement_sets1 = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
+    measurement_sets2 = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
     
-    id_sets = [messet.id for messet in selected_sets]
-    itgrades = [messet.itg_pcsl for messet in selected_sets]
-    itgrade_specs = [messet.itg for messet in selected_sets]
+    ids1 = [messet.id for messet in measurement_sets1]
+    itgrades1 = [messet.itg_pcsl for messet in measurement_sets1]
+    itgrade_specs1 = [messet.itg for messet in measurement_sets1]
      
      
-    id_set = [messet.id for messet in measurements_sets]
-    itgrade = [messet.itg_pcsl for messet in measurements_sets]
-    itgrade_spec = [messet.itg for messet in measurements_sets]
+    ids2 = [messet.id for messet in measurement_sets2]
+    itgrades2 = [messet.itg_pcsl for messet in measurement_sets2]
+    itgrade_specs2 = [messet.itg for messet in measurement_sets2]
     
 
     # FIRST PLOT - ITG vs. ITG SPEC
     plot1 = Plot()
-    plot1.addDots(itgrade,itgrade_spec,id_set)
-    plot1.addDots(itgrades,itgrade_specs,id_sets)
+    plot1.addDots(itgrade_specs1, itgrades1, ids1, legend='Simo-tek')
+    plot1.addDots(itgrade_specs2, itgrades2, ids2, legend='Other')
     plot1.addLine([8, 15],[8,15])
-    plot1.updateXLabel('Tolerance (IT grade)')
-    plot1.updateYLabel('Specified tolerance (ITgrade)')
+    plot1.updateXLabel('Specified tolerance (ITgrade)')
+    plot1.updateYLabel('Tolerance (IT grade)')
+    plot1.updateTitle('Specified vs Actual Tolerances')
 
     # SECOND PLOT - ITG ALL
     plot2 = Plot()
-    plot2.addList(itgrade,id_set)
-    plot2.addList(itgrades,id_sets)
+    plot2.addList(itgrades2,ids2)
+    plot2.addList(itgrades1,ids1)
+    plot2.updateXLabel('Tolerance (IT grade)')
+    plot2.updateYLabel('Probability')
     plot2.getValues()    
 
     # Third PLOT - CP ALL
-    cps = [messet.cp for messet in selected_sets]
-    cp = [messet.cp for messet in measurements_sets]
+    cps = [messet.cp for messet in measurement_sets1]
+    cp = [messet.cp for messet in measurement_sets2]
     
     plot3 = Plot()
-    plot3.addDots(id_set,cp,id_set)
-    plot3.addDots(id_sets,cps,id_sets)    
+    plot3.addDots(ids2,cp,ids2)
+    plot3.addDots(ids1,cps,ids1)    
     
     # Fourth plot - sorting ITG for diameter
-    cbs = [messet.cb for messet in selected_sets]
-    cb = [messet.cb for messet in measurements_sets]
+    cbs = [messet.cb for messet in measurement_sets1]
+    cb = [messet.cb for messet in measurement_sets2]
     
     plot4 = Plot()
-    plot4.addList(cb, id_set)
-    plot4.addList(cbs, id_sets)
+    plot4.addList(cb, ids2)
+    plot4.addList(cbs, ids1)
     plot4.updateXLabel('Cb normalised mean shift')
     
     # Fifth plot - sorting 
     
-    DI_sel_sets =  selected_sets.filter(specification_type='DI')
-    DI_mea_sets =  measurements_sets.filter(specification_type='DI')
+    DI_sel_sets =  measurement_sets1.filter(specification_type='DI')
+    DI_mea_sets =  measurement_sets2.filter(specification_type='DI')
     
     DI_itgs = [messet.itg_pcsl for messet in DI_sel_sets]
     DI_itg = [messet.itg_pcsl for messet in DI_mea_sets]
@@ -77,8 +80,8 @@ def plots(request, app_name):
     
     # Diameters or radius
     
-    DR_sel_sets = selected_sets.filter(Q(specification_type='R') | Q(specification_type='D')) 
-    DR_mea_sets = measurements_sets.filter(Q(specification_type='R') | Q(specification_type='D'))
+    DR_sel_sets = measurement_sets1.filter(Q(specification_type='R') | Q(specification_type='D')) 
+    DR_mea_sets = measurement_sets2.filter(Q(specification_type='R') | Q(specification_type='D'))
     
     DR_itgs = [messet.itg_pcsl for messet in DR_sel_sets]
     DR_itg = [messet.itg_pcsl for messet in DR_mea_sets]
@@ -108,11 +111,11 @@ def plots(request, app_name):
     
     try:
         inside_GT = GeneralTag.objects.get(pk = 5)
-#         in_sel_sets = selected_sets.filter(generaltag__in = [inside_GT]).distinct()
-        in_mea_sets = measurements_sets.filter(generaltag__in = [inside_GT]).distinct()
+#         in_sel_sets = measurement_sets1.filter(generaltag__in = [inside_GT]).distinct()
+        in_mea_sets = measurement_sets2.filter(generaltag__in = [inside_GT]).distinct()
         outside_GT = GeneralTag.objects.get(name = 'outside(shaft)')
-#         out_sel_sets = selected_sets.filter(generaltag__in = [outside_GT]).distinct()
-        out_mea_sets = measurements_sets.filter(generaltag__in = [outside_GT]).distinct()
+#         out_sel_sets = measurement_sets1.filter(generaltag__in = [outside_GT]).distinct()
+        out_mea_sets = measurement_sets2.filter(generaltag__in = [outside_GT]).distinct()
     except:
         pass
     
