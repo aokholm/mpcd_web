@@ -29,6 +29,7 @@ class Plot:
             'legend': 'none',
             'series': {  
             },
+            'height': 400,
         }
 
 
