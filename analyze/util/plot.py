@@ -121,7 +121,7 @@ class Plot(object):
             self.addLine(xvalue, conf_ll, certainty=False)
             
     
-    def addMessets(self, messetList, confInterval=False):
+    def addMessets(self, messetList, confInterval=True):
         for messet in messetList:
             xvals = [getattr(measurementSet, self.xAxis) for measurementSet in messet.measurementSets]
             ids =  [measurementSet.id for measurementSet in messet.measurementSets]
