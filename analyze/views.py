@@ -23,51 +23,49 @@ def plots(request, app_name):
     messet1 = MessetContainer(measurement_sets1, title='Simo-tek')
     messet2 = MessetContainer(measurement_sets2, title='Other')
     
-    measurement_sets1.legend = 'Simo-Tek'
-    
     ids1 = [messet.id for messet in measurement_sets1]
-#     itgrades1 = [messet.itg_pcsl for messet in measurement_sets1]
-#     itgrade_specs1 = [messet.itg for messet in measurement_sets1]
-     
-     
     ids2 = [messet.id for messet in measurement_sets2]
-#     itgrades2 = [messet.itg_pcsl for messet in measurement_sets2]
-#     itgrade_specs2 = [messet.itg for messet in measurement_sets2]
-    
+
+    plots = []
 
     # FIRST PLOT - ITG vs. ITG SPEC
-    plot1 = Plot()
-    plot1.setXAxis('itg')
-    plot1.setYAxis('itg_pcsl')
-    plot1.addMessets([messet1, messet2])
-    plot1.addLine([8, 15],[8,15])
-    plot1.updateXLabel('Specified tolerance (ITgrade)')
-    plot1.updateYLabel('Tolerance (IT grade)')
-    plot1.updateTitle('Specified vs Actual Tolerances')
-
+    plot = Plot()
+    plot.setXAxis('itg')
+    plot.setYAxis('itg_pcsl')
+    plot.addMessets([messet1, messet2])
+    plot.addLine([8, 15],[8,15])
+    plot.updateXLabel('Specified tolerance (ITgrade)')
+    plot.updateYLabel('Tolerance (IT grade)')
+    plot.updateTitle('Specified vs Actual Tolerances')
+    
+    plots.append(plot)
+    
     # SECOND PLOT - ITG ALL
-    plot2 = Plot()
-    plot2.setXAxis('itg_pcsl') 
-    plot2.addMessets([messet1, messet2])
-    plot2.updateXLabel('Tolerance (IT grade)')
-    plot2.updateYLabel('Probability')
+    plot = Plot()
+    plot.setXAxis('itg_pcsl') 
+    plot.addMessets([messet1, messet2], confInterval=True)
+    plot.updateXLabel('Tolerance (IT grade)')
+    plot.updateYLabel('Probability')
+    plots.append(plot)
 
     # Third PLOT - CP ALL
     cps = [messet.cp for messet in measurement_sets1]
     cp = [messet.cp for messet in measurement_sets2]
     
-    plot3 = Plot()
-    plot3.addDots(ids2,cp,ids2)
-    plot3.addDots(ids1,cps,ids1)    
+    plot = Plot()
+    plot.addDots(ids2,cp,ids2)
+    plot.addDots(ids1,cps,ids1)    
+    plots.append(plot)
     
     # Fourth plot - sorting ITG for diameter
     cbs = [messet.cb for messet in measurement_sets1]
     cb = [messet.cb for messet in measurement_sets2]
     
-    plot4 = Plot()
-    plot4.addList(cb, ids2)
-    plot4.addList(cbs, ids1)
-    plot4.updateXLabel('Cb normalised mean shift')
+    plot = Plot()
+    plot.addList(cb, ids2)
+    plot.addList(cbs, ids1)
+    plot.updateXLabel('Cb normalised mean shift')
+    plots.append(plot)
     
     # Fifth plot - sorting 
     
@@ -79,10 +77,11 @@ def plots(request, app_name):
     DI_ids = [messet.id for messet in DI_sel_sets]
     DI_id = [messet.id for messet in DI_mea_sets]
     
-    plot5 = Plot()
-    plot5.addList(DI_itg,DI_id)
-    plot5.addList(DI_itgs, DI_ids)
-    plot5.updateTitle('For Linear measurements only')
+    plot = Plot()
+    plot.addList(DI_itg,DI_id)
+    plot.addList(DI_itgs, DI_ids)
+    plot.updateTitle('For Linear measurements only')
+    plots.append(plot)
     
     # Diameters or radius
     
@@ -164,28 +163,12 @@ def plots(request, app_name):
 #     except:
 #         pass
      
-    
 
     return render(request, 'analyze/plots.html', 
         {
         'app_label': app_name,
         'view_label': 'lots og plot',
-        'json1' : plot1.getJson(),
-        'option1' : plot1.getOption(),
-        'json2' : plot2.getJson(),
-        'option2' : plot2.getOption(),
-        'json3' : plot3.getJson(),
-        'option3' : plot3.getOption(),
-        'json4' : plot4.getJson(),
-        'option4' : plot4.getOption(),
-        'json5' : plot5.getJson(),
-        'option5' : plot5.getOption(),
-        'json6' : plot6.getJson(),
-        'option6' : plot6.getOption(),
-        'json7' : plot7.getJson(),
-        'option7' : plot7.getOption(),
-        'json8' : plot8.getJson(),
-        'option8' : plot8.getOption(),
+        'plots' : plots,
         })
 
 

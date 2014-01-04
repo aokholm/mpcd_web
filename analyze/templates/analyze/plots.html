@@ -8,48 +8,34 @@
     <script>
         google.load('visualization', '1', {packages:['corechart']});
 
-        google.setOnLoadCallback(drawTable);
-        function drawTable() {
-            var itg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_itg'));
-            var itg_data = new google.visualization.DataTable({{json1}}, 0.6);
-            var itg_options = {{option1|safe}};
-            itg_chart.draw(itg_data, itg_options);
-          
-            var totalitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_totalitg'));
-            var totalitg_data = new google.visualization.DataTable({{json2}}, 0.6);
-            var totalitg_options = {{option2|safe}};
-            totalitg_chart.draw(totalitg_data, totalitg_options);
-       
-            var totalcp_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_totalcp'));
-            var totalcp_data = new google.visualization.DataTable({{json3}}, 0.6);
-            var totalcp_options = {{option3|safe}};
-            totalcp_chart.draw(totalcp_data, totalcp_options);
-            
-            var totalcb_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_totalcb'));
-            var totalcb_data = new google.visualization.DataTable({{json4}}, 0.6);
-            var totalcb_options = {{option4|safe}};
-            totalcb_chart.draw(totalcb_data, totalcb_options);
-            
-            var DIitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_DIitg'));
-            var DIitg_data = new google.visualization.DataTable({{json5}}, 0.6);
-            var DIitg_options = {{option5|safe}};
-            DIitg_chart.draw(DIitg_data, DIitg_options);
-            
-            var DRitg_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_DRitg'));
-            var DRitg_data = new google.visualization.DataTable({{json6}}, 0.6);
-            var DRitg_options = {{option6|safe}};
-            DRitg_chart.draw(DRitg_data, DRitg_options);
-            
-            var DRcb_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_DRcb'));
-            var DRcb_data = new google.visualization.DataTable({{json7}}, 0.6);
-            var DRcb_options = {{option7|safe}};
-            DRcb_chart.draw(DRcb_data, DRcb_options);
-            
-            var incb_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_incb'));
-            var incb_data = new google.visualization.DataTable({{json8}}, 0.6);
-            var incb_options = {{option8|safe}};
-            incb_chart.draw(incb_data, incb_options);
+        google.setOnLoadCallback(drawPlots);
+        
+        function drawPlots() {
+        	(function($) {
+	            	var plots = [
+	            	{% for plot in plots %}
+	            		{
+	            			title: '{{plot.option.title}}', 
+	            			data: {{plot.getJson}},
+	            			options: {{ plot.option |safe}}
+	            		},
+	            		
+	            	{% endfor %}
+	            	];
+	            	
+	            	for (var i = 0; i < plots.length; i++) {
+	            		var plot = plots[i];
+	            		var plotId = "plot" + i;
+	            		
+	            		$( "#plotContrainer" ).append( "<h3>" + plot.title + "</h3><div id='" + plotId + "'></div>" );
+	            		
+	            		var chart = new google.visualization.ScatterChart(document.getElementById(plotId));
+	            		var data = new google.visualization.DataTable(plot.data, 0.6);
+	            		chart.draw(data, plot.options)
+	            	}
+	         })(grp.jQuery);
         }
+
     </script>
 {% endblock %}
 
@@ -69,15 +55,7 @@
 
 {% block content %}
 <div class="g-d-c">
-    <h1> Hello world </h1>
-    <div id="chart_div_itg"></div>
-    <div id="chart_div_totalitg"></div>
-    <div id="chart_div_totalcp"></div>
-    <div id="chart_div_totalcb"></div>
-    <div id="chart_div_DIitg"></div>
-    <div id="chart_div_DRitg"></div>
-    <div id="chart_div_DRcb"></div>
-    <div id="chart_div_incb"></div>
+	<div id='plotContrainer'></div>
 </div>
 
 {% endblock %}
