@@ -3,6 +3,7 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 from prettytable import PrettyTable
 from analyze.util.plot import Plot
+from analyze.util.messetContainer import MessetContainer
 
 from django.db.models import Q
 from tags.models import GeneralTag
@@ -19,20 +20,26 @@ def plots(request, app_name):
     measurement_sets1 = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
     measurement_sets2 = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
     
+    messet1 = MessetContainer(measurement_sets1, title='Simo-tek')
+    messet2 = MessetContainer(measurement_sets2, title='Other')
+    
+    measurement_sets1.legend = 'Simo-Tek'
+    
     ids1 = [messet.id for messet in measurement_sets1]
-    itgrades1 = [messet.itg_pcsl for messet in measurement_sets1]
-    itgrade_specs1 = [messet.itg for messet in measurement_sets1]
+#     itgrades1 = [messet.itg_pcsl for messet in measurement_sets1]
+#     itgrade_specs1 = [messet.itg for messet in measurement_sets1]
      
      
     ids2 = [messet.id for messet in measurement_sets2]
-    itgrades2 = [messet.itg_pcsl for messet in measurement_sets2]
-    itgrade_specs2 = [messet.itg for messet in measurement_sets2]
+#     itgrades2 = [messet.itg_pcsl for messet in measurement_sets2]
+#     itgrade_specs2 = [messet.itg for messet in measurement_sets2]
     
 
     # FIRST PLOT - ITG vs. ITG SPEC
     plot1 = Plot()
-    plot1.addDots(itgrade_specs1, itgrades1, ids1, legend='Simo-tek')
-    plot1.addDots(itgrade_specs2, itgrades2, ids2, legend='Other')
+    plot1.setXAxis('itg')
+    plot1.setYAxis('itg_pcsl')
+    plot1.addMessets([messet1, messet2])
     plot1.addLine([8, 15],[8,15])
     plot1.updateXLabel('Specified tolerance (ITgrade)')
     plot1.updateYLabel('Tolerance (IT grade)')
@@ -40,11 +47,10 @@ def plots(request, app_name):
 
     # SECOND PLOT - ITG ALL
     plot2 = Plot()
-    plot2.addList(itgrades2,ids2)
-    plot2.addList(itgrades1,ids1)
+    plot2.setXAxis('itg_pcsl') 
+    plot2.addMessets([messet1, messet2])
     plot2.updateXLabel('Tolerance (IT grade)')
     plot2.updateYLabel('Probability')
-    plot2.getValues()    
 
     # Third PLOT - CP ALL
     cps = [messet.cp for messet in measurement_sets1]

@@ -33,6 +33,8 @@ class Plot:
             'height': 400,
             'pointSize': 2,
         }
+        self.xAxis = None
+        self.yAxis = None
     
     
     def addSeries (self, xlist, ylist, ids=None, line=False, legend=None):
@@ -164,8 +166,25 @@ class Plot:
         self.seriesIndex = self.seriesIndex + 2
     
     
+    def addMessets(self, messetList):
+        for messet in messetList:
+            xvals = [getattr(measurementSet, self.xAxis) for measurementSet in messet.measurementSets]
+            ids =  [measurementSet.id for measurementSet in messet.measurementSets]
+            
+            
+            if self.xAxis and self.yAxis:
+                yvals = [getattr(measurementSet, self.yAxis) for measurementSet in messet.measurementSets]
+                self.addDots(xvals, yvals, ids, legend = messet.title)
+            
+            if self.xAxis and not self.yAxis:
+                self.addList(xvals, ids, legend = messet.title)
+                
     
-    
+    def setXAxis(self, xAxis):
+        self.xAxis = xAxis
+        
+    def setYAxis(self, yAxis):
+        self.yAxis = yAxis    
     
     def updateTitle(self,title):
         self.option.update({'title': title })
