@@ -24,16 +24,6 @@ def plots(request, app_name):
     messet2 = MessetContainer(measurement_sets2, title='Other')
     
     measurement_sets1.legend = 'Simo-Tek'
-    
-    ids1 = [messet.id for messet in measurement_sets1]
-#     itgrades1 = [messet.itg_pcsl for messet in measurement_sets1]
-#     itgrade_specs1 = [messet.itg for messet in measurement_sets1]
-     
-     
-    ids2 = [messet.id for messet in measurement_sets2]
-#     itgrades2 = [messet.itg_pcsl for messet in measurement_sets2]
-#     itgrade_specs2 = [messet.itg for messet in measurement_sets2]
-    
 
     # FIRST PLOT - ITG vs. ITG SPEC
     plot1 = Plot()
@@ -51,89 +41,71 @@ def plots(request, app_name):
     plot2.addMessets([messet1, messet2])
     plot2.updateXLabel('Tolerance (IT grade)')
     plot2.updateYLabel('Probability')
-
-    # Third PLOT - CP ALL
-    cps = [messet.cp for messet in measurement_sets1]
-    cp = [messet.cp for messet in measurement_sets2]
+    plot2.updateTitle('Capability of manufactoring companies')
+    
+    # Third PLOT
+    MSGTacross = GeneralTag.objects.get(name = 'across mould halfs')
+    MSGTInternal = GeneralTag.objects.get(name = 'Internal in mold half')
+    
+    measurement_sets3 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTacross]).distinct()
+    measurement_sets4 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTInternal]).distinct()
+    
+    messet3 = MessetContainer(measurement_sets3, title='Internal mould measurement')
+    messet4 = MessetContainer(measurement_sets4, title='Across mould half measurement')
     
     plot3 = Plot()
-    plot3.addDots(ids2,cp,ids2)
-    plot3.addDots(ids1,cps,ids1)    
+    plot3.setXAxis('itg_pcsl')
+    plot3.addMessets([messet3, messet4])
+    plot3.updateTitle('Comparison of measurements internal in mould and across mould halfs')
+    plot3.updateXLabel('Tolerance (IT grade)')
+    plot3.updateYLabel('Probability')   
     
     # Fourth plot - sorting ITG for diameter
-    cbs = [messet.cb for messet in measurement_sets1]
-    cb = [messet.cb for messet in measurement_sets2]
+    measurement_sets5 = measurement_sets1.filter(Q(specification_type='R') | Q(specification_type='D')) 
+    measurement_sets6 = measurement_sets2.filter(Q(specification_type='Di'))
+    
+    messet5 = MessetContainer(measurement_sets5, title='Diameters and Radius')
+    messet6 = MessetContainer(measurement_sets6, title='Linear')
     
     plot4 = Plot()
-    plot4.addList(cb, ids2)
-    plot4.addList(cbs, ids1)
-    plot4.updateXLabel('Cb normalised mean shift')
+    plot4.setXAxis('itg_pcsl')
+    plot4.addMessets([messet5, messet6])
+    plot4.updateTitle('Comparison of linear measurements and diameter and radius')
+    plot4.updateXLabel('Tolerance (IT grade)')
+    plot4.updateYLabel('Probability')   
     
     # Fifth plot - sorting 
+    MSGTinside = GeneralTag.objects.get(name = 'Inside(Hole)')
+    MSGToutside = GeneralTag.objects.get(name = 'outside(shaft)')
     
-    DI_sel_sets =  measurement_sets1.filter(specification_type='DI')
-    DI_mea_sets =  measurement_sets2.filter(specification_type='DI')
+    measurement_sets7 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTinside]).distinct()
+    measurement_sets8 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGToutside]).distinct()
     
-    DI_itgs = [messet.itg_pcsl for messet in DI_sel_sets]
-    DI_itg = [messet.itg_pcsl for messet in DI_mea_sets]
-    DI_ids = [messet.id for messet in DI_sel_sets]
-    DI_id = [messet.id for messet in DI_mea_sets]
+    messet7 = MessetContainer(measurement_sets7, title='Inside(hole)')
+    messet8 = MessetContainer(measurement_sets8, title='Outside(shaft)')
     
     plot5 = Plot()
-    plot5.addList(DI_itg,DI_id)
-    plot5.addList(DI_itgs, DI_ids)
-    plot5.updateTitle('For Linear measurements only')
+    plot5.setXAxis('itg_pcsl')
+    plot5.addMessets([messet7, messet8])
+    plot5.updateTitle('Comparison of measurements inside and outside geometries')
+    plot5.updateXLabel('Tolerance (IT grade)')
+    plot5.updateYLabel('Probability')   
     
     # Diameters or radius
+    measurement_sets9 = MeasurementSet.objects.filter(ignore=False)
     
-    DR_sel_sets = measurement_sets1.filter(Q(specification_type='R') | Q(specification_type='D')) 
-    DR_mea_sets = measurement_sets2.filter(Q(specification_type='R') | Q(specification_type='D'))
-    
-    DR_itgs = [messet.itg_pcsl for messet in DR_sel_sets]
-    DR_itg = [messet.itg_pcsl for messet in DR_mea_sets]
-    DR_cbs = [messet.cb for messet in DR_sel_sets]
-    DR_cb = [messet.cb for messet in DR_mea_sets]
-    DR_ids = [messet.id for messet in DR_sel_sets]
-    DR_id = [messet.id for messet in DR_mea_sets]
-    
+    messet9 = MessetContainer(measurement_sets9, title='small (< 3mm)')
     
     plot6 = Plot()
-    plot6.addList(DR_itg, DR_id)
-    plot6.addList(DR_itgs, DR_ids)
-    plot6.updateTitle('Diameters and radius')
-    
+    plot6.setXAxis('itg_pcsl')
+    plot6.addMessets([messet9])
+    plot6.updateTitle('Comparison of capability of sizes')
+    plot6.updateXLabel('Tolerance (IT grade)')
+    plot6.updateYLabel('Probability')     
     
     plot7 = Plot()
-    plot7.addList(DR_cb, DR_id)
-    plot7.addList(DR_cbs, DR_ids)
-    plot7.updateXLabel('CB')
-    
-    # inside outside
-     
-    in_sel_sets = []
-    in_mea_sets = []
-    out_sel_sets = []
-    out_mea_sets = []
-    
-    try:
-        inside_GT = GeneralTag.objects.get(pk = 5)
-#         in_sel_sets = measurement_sets1.filter(generaltag__in = [inside_GT]).distinct()
-        in_mea_sets = measurement_sets2.filter(generaltag__in = [inside_GT]).distinct()
-        outside_GT = GeneralTag.objects.get(name = 'outside(shaft)')
-#         out_sel_sets = measurement_sets1.filter(generaltag__in = [outside_GT]).distinct()
-        out_mea_sets = measurement_sets2.filter(generaltag__in = [outside_GT]).distinct()
-    except:
-        pass
-    
-#     in_cbs = [messet.cb for messet in in_sel_sets]
-    in_cb = [messet.cb for messet in in_mea_sets]
-#     in_ids = [messet.id for messet in in_sel_sets]
-    in_id = [messet.id for messet in in_mea_sets]
-    
     plot8 = Plot()
-    plot8.addList(in_cb, in_id)
-#     plot8.addList(in_cbs, in_ids)
-    plot8.updateXLabel('CB')
+
     
     
     
