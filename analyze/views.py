@@ -19,8 +19,9 @@ def index(request, app_name):
 
 def plots(request, app_name):
     
-    MSetBase = MeasurementSet.objects.all().filter(ignore=False).select_related('measurement_report')
-    
+    MSetBase = MeasurementSet.objects.all().filter(ignore=False)
+    MSetBase = MSetBase.filter(Q(specification_type='R') | Q(specification_type='D') | Q(specification_type='Di') | Q(specification_type='PT'))
+    MSetBase = MSetBase.select_related('measurement_report')
     plots = []
     
     messets = [
@@ -34,10 +35,14 @@ def plots(request, app_name):
     # MOULD HALF
     MSGTacross = GeneralTag.objects.get(name = 'across mould halfs')
     MSGTInternal = GeneralTag.objects.get(name = 'Internal in mold half')
+    MSGTBoth = GeneralTag.objects.get(name = 'in both mould halfs')
+    MSGTSplitline = GeneralTag.objects.get(name = 'part of splitline')
     
     messets = [
-               MessetContainer(MSetBase.filter(generaltag__in = [MSGTacross]).distinct(), title='Internal mould measurement'),
-               MessetContainer(MSetBase.filter(generaltag__in = [MSGTInternal]).distinct(), title='Across mould half measurement'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTacross]).distinct(), title='Across mould half measurement'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTInternal]).distinct(), title='Internal mould measurement'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTBoth]).distinct(), title='Measurement in both moulf halfs'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTSplitline]).distinct(), title='Measurement part of splitline'),
                ]
     
     plots.extend(createStardardPlots(messets))
@@ -93,6 +98,15 @@ def plots(request, app_name):
                MessetContainer(MSetBase.filter(target__gte=6), title='large (6 <= x)'),
             ]
     plots.extend(createStardardPlots(messets))
+    
+    # Functional vs non-functional
+    MSGTFunctional = GeneralTag.objects.get(name = 'Functional dimension')    
+    messets = [
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTFunctional]).distinct(), title='Functional'),
+               MessetContainer(MSetBase.filter(~Q(generaltag__in = [MSGTFunctional])).distinct(), title='Other')
+               ]
+    plots.extend(createStardardPlots(messets))
+    
     
 #     plot = Plot()
 #     plot.setXAxis('itg_pcsl')
