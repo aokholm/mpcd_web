@@ -17,19 +17,23 @@ def index(request, app_name):
     return render(request, 'analyze/index.html', {'app_list': [app_dict],})
 
 def plots(request, app_name):
+    
+    plots = []
+    
+    
     measurement_sets1 = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
     measurement_sets2 = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
     
-    messet1 = MessetContainer(measurement_sets1, title='Simo-tek')
-    messet2 = MessetContainer(measurement_sets2, title='Other')
-
-    plots = []
-
+    messets = [
+              MessetContainer(measurement_sets1, title='Simo-tek'),
+              MessetContainer(measurement_sets2, title='Other')
+              ]
+    
     # ITG vs. ITG SPEC
     plot = Plot()
     plot.setXAxis('itg')
     plot.setYAxis('itg_pcsl')
-    plot.addMessets([messet1, messet2])
+    plot.addMessets(messets)
     plot.addLine([8, 15],[8,15])
     plot.updateXLabel('Specified tolerance (ITgrade)')
     plot.updateYLabel('Tolerance (IT grade)')
@@ -40,11 +44,54 @@ def plots(request, app_name):
     # ITG ALL
     plot = Plot()
     plot.setXAxis('itg_pcsl') 
-    plot.addMessets([messet1, messet2])
+    plot.addMessets(messets)
     plot.updateXLabel('Tolerance (IT grade)')
     plot.updateYLabel('Probability')
     plot.updateTitle('Capability of manufactoring companies')
     plots.append(plot)
+    
+    # Size vs. ITG PCSL
+    plot = Plot()
+    plot.setXAxis('target', log=True)
+    plot.setYAxis('itg_pcsl')
+    plot.addMessets(messets)
+    plot.updateXLabel('Target (mm)')
+    plot.updateYLabel('Tolerance (IT grade)')
+    plot.updateTitle('Tolerance as a fuction of size')
+    plots.append(plot)
+    
+    # Ca vs. Cp
+    
+    for messet in messets:
+        for measurementSet in messet.measurementSets:
+            measurementSet.stdOverSymtol = measurementSet.std / measurementSet.symtol 
+    
+    cpk = 5/3.0;
+    sigmaOverSymtolMax = 1/(cpk*3)
+    
+    plot = Plot()
+    plot.setXAxis('ca')
+    plot.setYAxis('stdOverSymtol')
+    plot.addMessets(messets)
+    plot.updateXLabel('Ca ()')
+    plot.updateYLabel('sigma / symtol ()')
+    plot.addLine([0, 1, 1],[0,sigmaOverSymtolMax, 0])
+    plot.updateTitle('Process centering vs process precision')
+    plots.append(plot)
+    
+    # normalized bias
+        
+    plot = Plot()
+    plot.setXAxis('target', log=True)
+    plot.setYAxis('cb')
+    plot.addMessets(messets)
+    plot.updateXLabel('Target (mm)')
+    plot.updateYLabel('Normalized mean shift (mm)')
+    plot.updateTitle('Normalized mean shift as function of size')
+    plots.append(plot)
+    
+    
+    
     
     # MOULD HALF
     MSGTacross = GeneralTag.objects.get(name = 'across mould halfs')

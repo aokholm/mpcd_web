@@ -33,7 +33,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
 
     readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
     list_display = ('id', 'measurement_report', 'measurement_number', 'target', 'count','specification_type',)
-    search_fields = ['id','measurement_report__material__name', 'measurement_report__process__name', 'generaltag__name', 'equipment__name']
+    search_fields = ['id','measurement_report__material__name', 'measurement_report__process__name', 'generaltag__name',]
     list_filter = ['measurement_report', ]
 
     fieldsets = [

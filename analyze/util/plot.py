@@ -140,11 +140,17 @@ class Plot(object):
     def newColor(self):
         self.colorIndex = self.colorIndex + 1
     
-    def setXAxis(self, xAxis):
+    def setXAxis(self, xAxis, log=False):
         self.xAxis = xAxis
         
-    def setYAxis(self, yAxis):
-        self.yAxis = yAxis    
+        if log:
+            self.option['hAxis']['logScale'] = 'true'
+        
+    def setYAxis(self, yAxis, log=False):
+        self.yAxis = yAxis
+        
+        if log:
+            self.option['vAxis']['logScale'] = 'true'
     
     def updateTitle(self,title):
         self.option.update({'title': title })
