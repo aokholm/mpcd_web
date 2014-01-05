@@ -3,6 +3,7 @@ from django.shortcuts import render
 from mesdata.models import MeasurementSet
 from prettytable import PrettyTable
 from analyze.util.plot import Plot
+from analyze.util.plot import createStardardPlots
 from analyze.util.messetContainer import MessetContainer
 
 from django.db.models import Q
@@ -18,167 +19,93 @@ def index(request, app_name):
 
 def plots(request, app_name):
     
+    MSetBase = MeasurementSet.objects.all().filter(ignore=False)
+    
     plots = []
     
-    
-    measurement_sets1 = MeasurementSet.objects.all().filter(ignore=False).filter(measurement_report__manufacturer__name='Simo-tek')
-    measurement_sets2 = MeasurementSet.objects.all().filter(ignore=False).filter(~Q(measurement_report__manufacturer__name='Simo-tek'))
-    
     messets = [
-              MessetContainer(measurement_sets1, title='Simo-tek'),
-              MessetContainer(measurement_sets2, title='Other')
+              MessetContainer(MSetBase.filter(measurement_report__manufacturer__name='Simo-tek'), title='Simo-tek'),
+              MessetContainer(MSetBase.filter(~Q(measurement_report__manufacturer__name='Simo-tek')), title='Other')
               ]
     
-    # ITG vs. ITG SPEC
-    plot = Plot()
-    plot.setXAxis('itg')
-    plot.setYAxis('itg_pcsl')
-    plot.addMessets(messets)
-    plot.addLine([8, 15],[8,15])
-    plot.updateXLabel('Specified tolerance (ITgrade)')
-    plot.updateYLabel('Tolerance (IT grade)')
-    plot.updateTitle('Specified vs Actual Tolerances')
-    
-    plots.append(plot)
-    
-    # ITG ALL
-    plot = Plot()
-    plot.setXAxis('itg_pcsl') 
-    plot.addMessets(messets)
-    plot.updateXLabel('Tolerance (IT grade)')
-    plot.updateYLabel('Probability')
-    plot.updateTitle('Capability of manufactoring companies')
-    plots.append(plot)
-    
-    # Size vs. ITG PCSL
-    plot = Plot()
-    plot.setXAxis('target', log=True)
-    plot.setYAxis('itg_pcsl')
-    plot.addMessets(messets)
-    plot.updateXLabel('Target (mm)')
-    plot.updateYLabel('Tolerance (IT grade)')
-    plot.updateTitle('Tolerance as a fuction of size')
-    plots.append(plot)
-    
-    # Ca vs. Cp
-    
-    for messet in messets:
-        for measurementSet in messet.measurementSets:
-            measurementSet.stdOverSymtol = measurementSet.std / measurementSet.symtol 
-    
-    cpk = 5/3.0;
-    sigmaOverSymtolMax = 1/(cpk*3)
-    
-    plot = Plot()
-    plot.setXAxis('ca')
-    plot.setYAxis('stdOverSymtol')
-    plot.addMessets(messets)
-    plot.updateXLabel('Ca ()')
-    plot.updateYLabel('sigma / symtol ()')
-    plot.addLine([0, 1, 1],[0,sigmaOverSymtolMax, 0])
-    plot.updateTitle('Process centering vs process precision')
-    plots.append(plot)
-    
-    # normalized bias
-        
-    plot = Plot()
-    plot.setXAxis('target', log=True)
-    plot.setYAxis('cb')
-    plot.addMessets(messets)
-    plot.updateXLabel('Target (mm)')
-    plot.updateYLabel('Normalized mean shift (mm)')
-    plot.updateTitle('Normalized mean shift as function of size')
-    plots.append(plot)
-    
-    
+    plots.extend(createStardardPlots(messets))
     
     
     # MOULD HALF
     MSGTacross = GeneralTag.objects.get(name = 'across mould halfs')
     MSGTInternal = GeneralTag.objects.get(name = 'Internal in mold half')
     
-    measurement_sets3 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTacross]).distinct()
-    measurement_sets4 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTInternal]).distinct()
+    messets = [
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTacross]).distinct(), title='Internal mould measurement'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTInternal]).distinct(), title='Across mould half measurement'),
+               ]
     
-    messet3 = MessetContainer(measurement_sets3, title='Internal mould measurement')
-    messet4 = MessetContainer(measurement_sets4, title='Across mould half measurement')
+    plots.extend(createStardardPlots(messets))
     
-    plot = Plot()
-    plot.setXAxis('itg_pcsl')
-    plot.addMessets([messet3, messet4])
-    plot.updateTitle('Comparison of measurements internal in mould and across mould halfs')
-    plot.updateXLabel('Tolerance (IT grade)')
-    plot.updateYLabel('Probability')
-    plots.append(plot) 
+#     plot = Plot()
+#     plot.setXAxis('itg_pcsl')
+#     plot.addMessets(messets)
+#     plot.updateTitle('Comparison of measurements internal in mould and across mould halfs')
+#     plot.updateXLabel('Tolerance (IT grade)')
+#     plot.updateYLabel('Probability')
+#     plots.append(plot) 
+    
     
     # Sorting ITG for diameter
-    measurement_sets5 = MeasurementSet.objects.all().filter(ignore=False).filter(Q(specification_type='R') | Q(specification_type='D')) 
-    measurement_sets6 = MeasurementSet.objects.all().filter(ignore=False).filter(Q(specification_type='Di'))
+    messets = [
+               MessetContainer(MSetBase.filter(Q(specification_type='R') | Q(specification_type='D')), title='Diameters and Radius'),
+               MessetContainer(MSetBase.filter(Q(specification_type='Di')), title='Linear')
+               ]
     
-    messet5 = MessetContainer(measurement_sets5, title='Diameters and Radius')
-    messet6 = MessetContainer(measurement_sets6, title='Linear')
-    
-    plot = Plot()
-    plot.setXAxis('itg_pcsl')
-    plot.addMessets([messet5, messet6])
-    plot.updateTitle('Comparison of linear measurements and diameter and radius')
-    plot.updateXLabel('Tolerance (IT grade)')
-    plot.updateYLabel('Probability')   
-    plots.append(plot) 
+    plots.extend(createStardardPlots(messets))
+#     plot = Plot()
+#     plot.setXAxis('itg_pcsl')
+#     plot.addMessets(messets)
+#     plot.updateTitle('Comparison of linear measurements and diameter and radius')
+#     plot.updateXLabel('Tolerance (IT grade)')
+#     plot.updateYLabel('Probability')   
+#     plots.append(plot) 
     
     
-    # Sorting 
+    # Inside Outside 
     MSGTinside = GeneralTag.objects.get(name = 'Inside(Hole)')
     MSGToutside = GeneralTag.objects.get(name = 'outside(shaft)')
     
-    measurement_sets7 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGTinside]).distinct()
-    measurement_sets8 = MeasurementSet.objects.filter(ignore=False).filter(generaltag__in = [MSGToutside]).distinct()
+    messets = [
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTinside]).distinct(), title='Inside(hole)'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGToutside]).distinct(), title='Outside(shaft)'),
+               ]
+    plots.extend(createStardardPlots(messets))
     
-    messet7 = MessetContainer(measurement_sets7, title='Inside(hole)')
-    messet8 = MessetContainer(measurement_sets8, title='Outside(shaft)')
-    
-    plot = Plot()
-    plot.setXAxis('itg_pcsl')
-    plot.addMessets([messet7, messet8])
-    plot.updateTitle('Comparison of measurements inside and outside geometries')
-    plot.updateXLabel('Tolerance (IT grade)')
-    plot.updateYLabel('Probability')   
-    plots.append(plot) 
+#     plot = Plot()
+#     plot.setXAxis('itg_pcsl')
+#     plot.addMessets(messets)
+#     plot.updateTitle('Comparison of measurements inside and outside geometries')
+#     plot.updateXLabel('Tolerance (IT grade)')
+#     plot.updateYLabel('Probability')   
+#     plots.append(plot) 
     
     
     # Diameters or radius
-    measurement_sets1 = MeasurementSet.objects.filter(ignore=False).filter(target__lt=3)
-    measurement_sets2 = MeasurementSet.objects.filter(ignore=False).filter(target__gte=3).filter(target__lt=6)
-    measurement_sets3 = MeasurementSet.objects.filter(ignore=False).filter(target__gte=6)
-    
     messets = [
-               MessetContainer(measurement_sets1, title='small (x < 3)'),
-               MessetContainer(measurement_sets2, title='medium (3 <= x < 6)'),
-               MessetContainer(measurement_sets3, title='large (6 <= x)'),
+               MessetContainer(MSetBase.filter(target__lt=3), title='small (x < 3)'),
+               MessetContainer(MSetBase.filter(target__gte=3).filter(target__lt=6), title='medium (3 <= x < 6)'),
+               MessetContainer(MSetBase.filter(target__gte=6), title='large (6 <= x)'),
             ]
+    plots.extend(createStardardPlots(messets))
     
-    plot = Plot()
-    plot.setXAxis('itg_pcsl')
-    plot.addMessets(messets)
-    plot.updateTitle('Comparison of capability of sizes')
-    plot.updateXLabel('Tolerance (IT grade)')
-    plot.updateYLabel('Probability')
-    plots.append(plot)    
+#     plot = Plot()
+#     plot.setXAxis('itg_pcsl')
+#     plot.addMessets(messets)
+#     plot.updateTitle('Comparison of capability of sizes')
+#     plot.updateXLabel('Tolerance (IT grade)')
+#     plot.updateYLabel('Probability')
+#     plots.append(plot)    
     
     
     
 #     diMeasurements = MeasurementSet.objects.filter(specification_type='DI')
 #     notdiMeasurements = MeasurementSet.objects.filter(~Q(specification_type='DI'))
-#     
-#     lst_diameter = [messet.itg_pcsl for messet in diMeasurements]
-#     id1 = [messet.id for messet in diMeasurements]
-#     lst_other = [messet.itg_pcsl for messet in notdiMeasurements]
-#     id2 = [messet.id for messet in notdiMeasurements]
-#     
-#     plot4 = Plot()
-#     plot4.addList(lst_diameter, id1)
-#     plot4.addList(lst_other, id2)
-
 
     
     # fifth plot - sorting first run

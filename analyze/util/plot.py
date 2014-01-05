@@ -37,7 +37,7 @@ class Plot(object):
         self.yAxis = None
     
     
-    def addSeries (self, xlist, ylist, ids=None, line=False, legend=None, certainty = True):
+    def addSeries (self, xlist, ylist, ids=None, line=False, legend=None, certainty = True, color = False):
         
         yListId = 'yval' + str(self.seriesIndex)
         self.columnOrder.append(yListId)
@@ -69,9 +69,13 @@ class Plot(object):
             self.description[certaintyId] = ("boolean", "Certainty", {"role":"certainty"})
        
         seriesOptions = {
-            'color': colorlist[self.colorIndex],
             'visibleInLegend': 'false',
             }
+        
+        if color:
+            seriesOptions['color'] = colorlist[color]
+        else:
+            seriesOptions['color'] = colorlist[self.colorIndex]
          
         if not ids:
             seriesOptions['tooltip'] = 'none'
@@ -185,3 +189,73 @@ class Plot(object):
 
     def getValues(self):
         return self.description.keys()
+    
+
+def createStardardPlots(messets):
+    
+    plots = []
+    
+    guideLineColor = 3
+    
+     # ITG vs. ITG SPEC
+    plot = Plot()
+    plot.setXAxis('itg')
+    plot.setYAxis('itg_pcsl')
+    plot.addMessets(messets)
+    plot.addLine([9, 15],[9,15], color=guideLineColor)
+    plot.updateXLabel('Specified tolerance (ITgrade)')
+    plot.updateYLabel('Tolerance (IT grade)')
+    plot.updateTitle('Specified vs Actual Tolerances')
+    
+    plots.append(plot)
+    
+    # ITG PCSL
+    plot = Plot()
+    plot.setXAxis('itg_pcsl') 
+    plot.addMessets(messets)
+    plot.updateXLabel('Tolerance (IT grade)')
+    plot.updateYLabel('Probability')
+    plot.updateTitle('Process Capability')
+    plots.append(plot)
+    
+    # Size vs. ITG PCSL
+    plot = Plot()
+    plot.setXAxis('target', log=True)
+    plot.setYAxis('itg_pcsl')
+    plot.addMessets(messets)
+    plot.updateXLabel('Target (mm)')
+    plot.updateYLabel('Tolerance (IT grade)')
+    plot.updateTitle('Tolerance as a fuction of size')
+    plots.append(plot)
+    
+    # Size vs normalized bias
+        
+    plot = Plot()
+    plot.setXAxis('target', log=True)
+    plot.setYAxis('cb')
+    plot.addMessets(messets)
+    plot.updateXLabel('Target (mm)')
+    plot.updateYLabel('Normalized mean shift (mm)')
+    plot.updateTitle('Normalized mean shift as function of size')
+    plots.append(plot)
+    
+    # Ca vs. sigma over symtol
+    
+    for messet in messets:
+        for measurementSet in messet.measurementSets:
+            measurementSet.stdOverSymtol = measurementSet.std / measurementSet.symtol 
+    
+    cpk = 5/3.0;
+    sigmaOverSymtolMax = 1/(cpk*3)
+    
+    plot = Plot()
+    plot.setXAxis('ca')
+    plot.setYAxis('stdOverSymtol')
+    plot.addMessets(messets)
+    plot.updateXLabel('Ca ()')
+    plot.updateYLabel('sigma / symtol ()')
+    plot.addLine([0, 1, 1],[0,sigmaOverSymtolMax, 0], color=guideLineColor)
+    plot.updateTitle('Process centering vs process precision')
+    plots.append(plot)
+    
+    return plots
