@@ -37,11 +37,11 @@ class Plot(object):
         self.yAxis = None
     
     
-    def addSeries (self, xlist, ylist, ids=None, line=False, legend=None, certainty = True, color = False):
+    def addSeries (self, xlist, ylist, tooltips=None, line=False, legend=None, certainty = True, color = False):
         
         yListId = 'yval' + str(self.seriesIndex)
         self.columnOrder.append(yListId)
-        if ids:
+        if tooltips:
             yListToolId = 'yvaltool' + str(self.seriesIndex)
             self.columnOrder.append(yListToolId)
         if not certainty:
@@ -52,8 +52,8 @@ class Plot(object):
         for i in range(len(xlist)):
             row = { self.xvalues: xlist[i],
                    yListId : ylist[i],}
-            if ids:
-                row[yListToolId] = "Set No: %s" % ids[i]
+            if tooltips:
+                row[yListToolId] = tooltips[i]
             
             if not certainty:
                 row[certaintyId] = False
@@ -63,7 +63,7 @@ class Plot(object):
         descriptionString = legend if legend else "yval"
                 
         self.description[yListId] = ("number" , descriptionString)
-        if ids:
+        if tooltips:
             self.description[yListToolId] = ("string","Tip1",{"role":"tooltip"})
         if not certainty:
             self.description[certaintyId] = ("boolean", "Certainty", {"role":"certainty"})
@@ -77,7 +77,7 @@ class Plot(object):
         else:
             seriesOptions['color'] = colorlist[self.colorIndex]
          
-        if not ids:
+        if not tooltips:
             seriesOptions['tooltip'] = 'none'
             seriesOptions['enableInteractivity'] = 'false'
          
@@ -102,19 +102,20 @@ class Plot(object):
         self.addSeries(xlist, ylist, line=True, **kwargs)
         
 
-    def addDots (self, xlist, ylist, ids, **kwargs):
-        
-        self.addSeries(xlist, ylist, ids=ids, **kwargs)
+    def addDots (self, xlist, ylist, ids=False, tooltips=False, **kwargs):
+        if ids:
+            tooltips = ["Id: %s" % id for id in ids]
+        self.addSeries(xlist, ylist, tooltips=tooltips, **kwargs)
 
 
-    def addList (self, distList, id_set, confInterval = False, **kwargs):
+    def addList (self, distList, tooltips, confInterval = False, **kwargs):
         
         if len(distList) <= 2:
             return False
         
-        sorted_itgrade, sorted_id = zip(*sorted(zip(distList,id_set)))
+        sorted_itgrade, sorted_tooltips = zip(*sorted(zip(distList,tooltips)))
         cumFreq = [(i+1)*(1/float(len(distList)+1)) for i in range(len(distList))]
-        self.addDots(sorted_itgrade, cumFreq, sorted_id, **kwargs)
+        self.addDots(sorted_itgrade, cumFreq, sorted_tooltips, **kwargs)
         
         [xvalue , cdfvalue] = list2cdf(distList)
         self.addLine(xvalue, cdfvalue)
@@ -128,15 +129,14 @@ class Plot(object):
     def addMessets(self, messetList, confInterval=True):
         for messet in messetList:
             xvals = [getattr(measurementSet, self.xAxis) for measurementSet in messet.measurementSets]
-            ids =  [measurementSet.id for measurementSet in messet.measurementSets]
-            
+            tooltips = ["report: %s \nNr: %s, Id: %s" % (measurementSet.measurement_report.part_name, measurementSet.measurement_number, measurementSet.id) for measurementSet in messet.measurementSets]
             
             if self.xAxis and self.yAxis:
                 yvals = [getattr(measurementSet, self.yAxis) for measurementSet in messet.measurementSets]
-                self.addDots(xvals, yvals, ids, legend = messet.title)
+                self.addDots(xvals, yvals, tooltips=tooltips, legend = messet.title)
             
             if self.xAxis and not self.yAxis:
-                self.addList(xvals, ids, legend = messet.title, confInterval=confInterval)
+                self.addList(xvals, tooltips, legend = messet.title, confInterval=confInterval)
                 
             self.colorIndex = self.colorIndex + 1
                 

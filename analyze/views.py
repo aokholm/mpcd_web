@@ -19,7 +19,7 @@ def index(request, app_name):
 
 def plots(request, app_name):
     
-    MSetBase = MeasurementSet.objects.all().filter(ignore=False)
+    MSetBase = MeasurementSet.objects.all().filter(ignore=False).select_related('measurement_report')
     
     plots = []
     
