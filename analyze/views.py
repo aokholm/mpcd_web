@@ -25,7 +25,7 @@ def plots(request, app_name):
     plots = []
     
     messets = [
-              MessetContainer(MSetBase.filter(measurement_report__manufacturer__name='Simo-tek'), title='Simo-tek'),
+              MessetContainer(MSetBase.filter(measurement_report__manufacturer__name='Simo-tek'), title='Manufactured by Simo-tek'),
               MessetContainer(MSetBase.filter(~Q(measurement_report__manufacturer__name='Simo-tek')), title='Other')
               ]
     
@@ -41,8 +41,8 @@ def plots(request, app_name):
     messets = [
                MessetContainer(MSetBase.filter(generaltag__in = [MSGTacross]).distinct(), title='Across mould half measurement'),
                MessetContainer(MSetBase.filter(generaltag__in = [MSGTInternal]).distinct(), title='Internal mould measurement'),
-               MessetContainer(MSetBase.filter(generaltag__in = [MSGTBoth]).distinct(), title='Measurement in both moulf halfs'),
-               MessetContainer(MSetBase.filter(generaltag__in = [MSGTSplitline]).distinct(), title='Measurement part of splitline'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTBoth]).distinct(), title='Measurement in both mould halfs'),
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTSplitline]).distinct(), title='Measurement part of split line'),
                ]
     
     plots.extend(createStardardPlots(messets))
@@ -102,9 +102,18 @@ def plots(request, app_name):
     # Functional vs non-functional
     MSGTFunctional = GeneralTag.objects.get(name = 'Functional dimension')    
     messets = [
-               MessetContainer(MSetBase.filter(generaltag__in = [MSGTFunctional]).distinct(), title='Functional'),
-               MessetContainer(MSetBase.filter(~Q(generaltag__in = [MSGTFunctional])).distinct(), title='Other')
+               MessetContainer(MSetBase.filter(generaltag__in = [MSGTFunctional]).distinct(), title='Functional surface'),
+               MessetContainer(MSetBase.filter(~Q(generaltag__in = [MSGTFunctional])).distinct(), title='Non critical surface')
                ]
+    plots.extend(createStardardPlots(messets))
+    
+    
+    
+    # Measurement companies
+    messets = [
+              MessetContainer(MSetBase.filter(measurement_report__measurementCompany__name='Simo-tek').filter(Q(measurement_report__part_name__contains ='Rotor') | Q(measurement_report__part_name__contains ='Axel')), title='Measured by Simo-tek'),
+              MessetContainer(MSetBase.filter(~Q(measurement_report__measurementCompany__name='Simo-tek')).filter(Q(measurement_report__part_name__contains ='Rotor') | Q(measurement_report__part_name__contains ='Axel')), title='Other')
+              ]
     plots.extend(createStardardPlots(messets))
     
     

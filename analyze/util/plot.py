@@ -225,7 +225,7 @@ def createStardardPlots(messets):
     plot.addMessets(messets)
     plot.updateXLabel('Target (mm)')
     plot.updateYLabel('Tolerance (IT grade)')
-    plot.updateTitle('Tolerance as a fuction of size')
+    plot.updateTitle('Tolerance as a function of size')
     plots.append(plot)
     
     # Size vs normalized bias
@@ -235,7 +235,7 @@ def createStardardPlots(messets):
     plot.setYAxis('cb')
     plot.addMessets(messets)
     plot.updateXLabel('Target (mm)')
-    plot.updateYLabel('Normalized mean shift (mm)')
+    plot.updateYLabel('Normalized mean shift - Cb')
     plot.updateTitle('Normalized mean shift as function of size')
     plots.append(plot)
     
@@ -252,10 +252,23 @@ def createStardardPlots(messets):
     plot.setXAxis('ca')
     plot.setYAxis('stdOverSymtol')
     plot.addMessets(messets)
-    plot.updateXLabel('Ca ()')
-    plot.updateYLabel('sigma / symtol ()')
     plot.addLine([0, 1, 1],[0,sigmaOverSymtolMax, 0], color=guideLineColor)
+    plot.updateXLabel('Closeness to target - Ca')
+    plot.updateYLabel('Normalised variance')
     plot.updateTitle('Process centering vs process precision')
+    plots.append(plot)
+    
+    # CP vs. target
+    
+    plot = Plot()
+    #plot.setXAxis('target', log=True)
+    #plot.setXAxis('itg_pcsl') 
+    plot.setXAxis('cb') 
+    plot.setYAxis('cp', )
+    plot.addMessets(messets)
+    plot.updateXLabel('Normalized mean shift - Cb')
+    plot.updateYLabel('Process variance index')
+    plot.updateTitle('Process variance vs mean shift')
     plots.append(plot)
     
     return plots
