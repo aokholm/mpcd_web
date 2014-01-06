@@ -268,10 +268,23 @@ def createStardardPlots(messets):
     plot.setXAxis('ca')
     plot.setYAxis('stdOverSymtol')
     plot.addMessets(messets)
-    plot.updateXLabel('Ca ()')
-    plot.updateYLabel('sigma / symtol ()')
     plot.addLine([0, 1, 1],[0,sigmaOverSymtolMax, 0], color=guideLineColor)
+    plot.updateXLabel('Closeness to target - Ca')
+    plot.updateYLabel('Normalised variance')
     plot.updateTitle('Process centering vs process precision')
+    plots.append(plot)
+    
+    # CP vs. target
+    
+    plot = Plot()
+    #plot.setXAxis('target', log=True)
+    #plot.setXAxis('itg_pcsl') 
+    plot.setXAxis('cb') 
+    plot.setYAxis('cp', )
+    plot.addMessets(messets)
+    plot.updateXLabel('Normalized mean shift - Cb')
+    plot.updateYLabel('Process variance index')
+    plot.updateTitle('Process variance vs mean shift')
     plots.append(plot)
     
     return plots
