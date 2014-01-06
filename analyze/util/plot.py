@@ -204,7 +204,7 @@ def createStardardPlots(messets):
     plot.addMessets(messets)
     plot.addLine([9, 15],[9,15], color=guideLineColor)
     plot.updateXLabel('Specified tolerance (ITgrade)')
-    plot.updateYLabel('Tolerance (IT grade)')
+    plot.updateYLabel('PCSL Tolerance (IT grade)')
     plot.updateTitle('Specified vs Actual Tolerances')
     
     plots.append(plot)
@@ -225,21 +225,37 @@ def createStardardPlots(messets):
     plot.addMessets(messets)
     plot.updateXLabel('Target (mm)')
     plot.updateYLabel('Tolerance (IT grade)')
-    plot.updateTitle('Tolerance as a fuction of size')
+    plot.updateTitle('Tolerance as a function of size')
     plots.append(plot)
     
-    # Size vs normalized bias
+    # normalized bias
         
     plot = Plot()
-    plot.setXAxis('target', log=True)
-    plot.setYAxis('cb')
+    plot.setXAxis('cb')
     plot.addMessets(messets)
-    plot.updateXLabel('Target (mm)')
-    plot.updateYLabel('Normalized mean shift (mm)')
-    plot.updateTitle('Normalized mean shift as function of size')
+    plot.updateXLabel('Normalized mean shift ()')
+    plot.updateYLabel('Probability')
+    plot.updateTitle('Normalized mean shift')
     plots.append(plot)
     
-    # Ca vs. sigma over symtol
+    # Normalized bias 2
+    
+#     for messet in messets:
+#         for measurementSet in messet.measurementSets:
+#             measurementSet.stdOverPcsl = measurementSet.std / measurementSet.pcsl 
+#     
+#     cpk = 5/3.0;
+#     sigmaOverSymtolMax = 1/(cpk*3)
+    
+    plot = Plot()
+    plot.setXAxis('ca_pcsl')
+    plot.addMessets(messets)
+    plot.updateXLabel('Ca_PCSL ()')
+    plot.updateYLabel('Probability')
+    plot.updateTitle('Process centering vs process precision (PCSL)')
+    plots.append(plot)
+    
+    # Ca vs. sigma over symtol 2
     
     for messet in messets:
         for measurementSet in messet.measurementSets:

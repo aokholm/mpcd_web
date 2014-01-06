@@ -28,7 +28,7 @@
 	            		var plotId = "plot" + i;
 	            		
 	            		//$( "#plotContrainer" ).append( "<h3>" + plot.title + "</h3><div id='" + plotId + "'></div>" );
-	            		$( "#plotContrainer" ).append( "<div id='" + plotId + "'></div>" );
+	            		$( "#plotContrainer" ).append( "<div style='page-break-after:always' id='" + plotId + "'></div>" );
 	            		
 	            		var chart = new google.visualization.ScatterChart(document.getElementById(plotId));
 	            		var data = new google.visualization.DataTable(plot.data, 0.6);

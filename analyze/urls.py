@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from mpcd_web.admin import admin_site
-from analyze import views, designview
+from analyze import views, designview, exportview
 
 urlpatterns = patterns('',
     # ex: /analyze/
@@ -8,7 +8,8 @@ urlpatterns = patterns('',
     # ex: /analyze/process/
     url(r'^process/', admin_site.admin_view(views.process), name='process'),
     url(r'^design/', admin_site.admin_view(designview.design), name='design'),
-    url(r'^plots/', admin_site.admin_view(views.plots),name='plots')
+    url(r'^plots/', admin_site.admin_view(views.plots),name='plots'),
+    url(r'^export/', admin_site.admin_view(exportview.export), name='export'),
     # # ex: /polls/5/
     # url(r'^(?P<pk>\d+)/$', views.DetailView.as_view(), name='detail'),
     # # ex: /polls/5/results/

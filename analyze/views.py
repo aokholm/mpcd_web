@@ -107,6 +107,18 @@ def plots(request, app_name):
                ]
     plots.extend(createStardardPlots(messets))
     
+        # Functional vs non-functional
+    MSGTException = GeneralTag.objects.get(name = 'exeception attributes')
+    MSGTException_children = MSGTException.get_children()
+    MSGTExceptionList = [MSGTException_child.pk for MSGTException_child in MSGTException_children]
+    MSGTExceptionList.append(MSGTException.pk)
+    
+    messets = [ 
+               MessetContainer(MSetBase.filter(generaltag__in = MSGTExceptionList).distinct(), title='Exceptions'),
+               MessetContainer(MSetBase.filter(~Q(generaltag__in = MSGTExceptionList)).distinct(), title='Other')
+               ]
+    plots.extend(createStardardPlots(messets))
+    
     
 #     plot = Plot()
 #     plot.setXAxis('itg_pcsl')
