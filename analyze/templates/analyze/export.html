@@ -16,12 +16,14 @@
 {% block content %}
    <div class="g-d-c">
         <H1>Export</H1>
-        <ul>
+        <table>
 		{% for messet in data%}
-			<li>
-				{{ messet.id }}, {{ messet.generaltag.all }}, {{ messet.itg }} {{ variable }}
-        	</li>
+			<tr>
+				{% for item in messet %}
+					<td>{{item}}</td>
+				{% endfor %}
+			</tr>
         {% endfor %}
-        </ul>
+        </table>
     </div>
 {% endblock %}
