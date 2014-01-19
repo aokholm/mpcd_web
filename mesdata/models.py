@@ -70,12 +70,12 @@ class MeasurementSet(models.Model):
     std = models.FloatField('Standard deviation',blank=True, null=True)
     
     pcsl = models.FloatField('PCSL', blank=True, null=True)
-    ca = models.FloatField('Process Centering', blank=True, null=True)
-    ca_pcsl = models.FloatField('Process Cent. PCSL', blank=True, null=True)
-    cb = models.FloatField('Normalized Bias', blank=True, null=True)
-    cp = models.FloatField('Process Variation', blank=True, null=True)
-    itg = models.FloatField('Spec. IT grade', blank = True, null = True)
-    itg_pcsl = models.FloatField('PCSL (IT grade)', blank=True, null=True)
+    ca = models.FloatField('Process Centering (Ca)', blank=True, null=True)
+    ca_pcsl = models.FloatField('Process Cent. PCSL (Ca_pcsl)', blank=True, null=True)
+    cb = models.FloatField('Normalized Bias (Cb)', blank=True, null=True)
+    cp = models.FloatField('Process Variation (Cp)', blank=True, null=True)
+    itg = models.FloatField('IT grade (ITG)', blank = True, null = True)
+    itg_pcsl = models.FloatField('IT grade (ITG_pcsl)', blank=True, null=True)
     
     target = models.FloatField('Nominal / Target')
     usl = models.FloatField('Upper tolerance',blank=True, null=True)

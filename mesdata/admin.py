@@ -43,7 +43,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         }),
         ('Process capability information', {
             'classes': ('grp-collapse grp-closed',),
-            'fields': ['ca','ca_pcsl','cb','cp','itg','itg_pcsl']
+            'fields': ['pcsl', 'ca', 'ca_pcsl', 'cb', 'cp', 'itg','itg_pcsl']
         }),
     ]
     inlines = (MeasurementInline, )
