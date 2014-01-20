@@ -129,6 +129,20 @@ def plots(request, app_name):
     plots.extend(createStardardPlots(messets))
     
     
+    # DEESIGN EXAMPLE
+    # Measurement companies
+    # MSGTFunctional
+    # MSGTInternal
+    # MSGTinside
+    # MSGToutside
+    # Q(specification_type='D')
+    
+    messets = [
+              MessetContainer(MSetBase.filter(specification_type='D').filter(generaltag__in = [MSGTInternal] ).filter(generaltag__in = [MSGTinside] ).distinct(), title='Int, Inside'),
+              MessetContainer(MSetBase.filter(specification_type='D').filter(generaltag__in = [MSGTacross, MSGTBoth] ).filter(generaltag__in = [MSGToutside] ).distinct(), title='Across, Outside'),
+              ]
+    plots.extend(createStardardPlots(messets))
+    
 #     plot = Plot()
 #     plot.setXAxis('itg_pcsl')
 #     plot.addMessets(messets)
