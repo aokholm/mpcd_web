@@ -74,6 +74,7 @@ class MeasurementSet(models.Model):
     ca_pcsl = models.FloatField('Process Cent. PCSL (Ca_pcsl)', blank=True, null=True)
     cb = models.FloatField('Normalized Bias (Cb)', blank=True, null=True)
     cp = models.FloatField('Process Variation (Cp)', blank=True, null=True)
+    cpk = models.FloatField('Cpk', blank=True, null=True)
     itg = models.FloatField('IT grade (ITG)', blank = True, null = True)
     itg_pcsl = models.FloatField('IT grade (ITG_pcsl)', blank=True, null=True)
     
@@ -143,11 +144,11 @@ class MeasurementSet(models.Model):
             self.count = len(measurements)
             self.mean = mean(measurements)
     
-            self.cpk = 1.66
+            self.cpkDesired = 1.66
             self.mean_shift = self.mean - self.target
             self.std = std(measurements, ddof=1)/c4stdCorrectionFactor(self.count)
             
-            self.pcsl = stdMeanshiftCpk2Symtol(self.std, self.mean_shift, self.cpk)
+            self.pcsl = stdMeanshiftCpk2Symtol(self.std, self.mean_shift, self.cpkDesired)
             self.ca_pcsl = 1-abs(self.mean_shift)/ self.pcsl
             self.itg_pcsl = dimSymtol2Itg(self.target, self.pcsl)
             
@@ -157,6 +158,8 @@ class MeasurementSet(models.Model):
                 self.ca = 1 - abs(self.mean_shift) / self.symtol
                 self.cb = self.mean_shift / self.symtol
                 self.cp = self.symtol / (3 * self.std)
+                m = (self.lsl + self.usl) / 2
+                self.cpk = ( self.symtol - abs(self.mean - m) ) / (3*self.std) 
     
     def save(self, *args, **kwargs):
         self.setPCparameters()

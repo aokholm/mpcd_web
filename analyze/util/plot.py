@@ -108,7 +108,7 @@ class Plot(object):
         self.addSeries(xlist, ylist, tooltips=tooltips, **kwargs)
 
 
-    def addList (self, distList, tooltips, confInterval = False, **kwargs):
+    def addList (self, distList, tooltips, normalFit = True, confInterval = False, **kwargs):
         
         if len(distList) <= 2:
             return False
@@ -118,7 +118,8 @@ class Plot(object):
         self.addDots(sorted_itgrade, cumFreq, sorted_tooltips, **kwargs)
         
         [xvalue , cdfvalue] = list2cdf(distList)
-        self.addLine(xvalue, cdfvalue)
+        if normalFit:
+            self.addLine(xvalue, cdfvalue)
         
         if confInterval:
             [conf_ul, conf_ll] = wilson([x*len(distList) for x in cdfvalue] , len(distList) , 0.05)
@@ -126,7 +127,7 @@ class Plot(object):
             self.addLine(xvalue, conf_ll, certainty=False)
             
     
-    def addMessets(self, messetList, confInterval=True):
+    def addMessets(self, messetList, normalFit=True, confInterval=True):
         for messet in messetList:
             xvals = [getattr(measurementSet, self.xAxis) for measurementSet in messet.measurementSets]
             tooltips = ["report: %s \nNr: %s, Id: %s" % (measurementSet.measurement_report.part_name, measurementSet.measurement_number, measurementSet.id) for measurementSet in messet.measurementSets]
@@ -136,7 +137,7 @@ class Plot(object):
                 self.addDots(xvals, yvals, tooltips=tooltips, legend = messet.title)
             
             if self.xAxis and not self.yAxis:
-                self.addList(xvals, tooltips, legend = messet.title, confInterval=confInterval)
+                self.addList(xvals, tooltips, legend = messet.title, confInterval=confInterval, normalFit=normalFit)
                 
             self.colorIndex = self.colorIndex + 1
                 
@@ -249,7 +250,7 @@ def createStardardPlots(messets):
     
     plot = Plot()
     plot.setXAxis('ca_pcsl')
-    plot.addMessets(messets)
+    plot.addMessets(messets, normalFit=False, confInterval=False)
     plot.updateXLabel('Ca_PCSL ()')
     plot.updateYLabel('Probability')
     plot.updateTitle('Process centering vs process precision (PCSL)')

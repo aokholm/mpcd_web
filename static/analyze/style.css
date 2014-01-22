@@ -1,0 +1,2 @@
+select[multiple=multiple].halfHeight { height: 80px; }
+select[multiple=multiple].quaterHeight { height: 40px; }

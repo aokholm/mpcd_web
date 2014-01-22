@@ -1,20 +1,44 @@
 {% extends "admin/index.html" %}
 {% load i18n grp_tags %}
-
+{% block stylesheets %}
+	{{block.super}}
+	<link rel="stylesheet" href="{{ STATIC_URL }}analyze/style.css" />
+{% endblock %}
 {% block javascripts %}
     {{ block.super }}
     <script src="https://www.google.com/jsapi" type="text/javascript"></script>
     <script>
         google.load('visualization', '1', {packages:['corechart']});
 
-        google.setOnLoadCallback(drawTable);
-        function drawTable() {
-            var json_chart = new google.visualization.ScatterChart(document.getElementById('chart_div_json'));
-            var json_data = new google.visualization.DataTable({{json}}, 0.6);
-            var options = {{option|safe}};
-
-            json_chart.draw(json_data, options);
+        google.setOnLoadCallback(drawPlots);
+        
+        function drawPlots() {
+        	(function($) {
+	            	var plots = [
+	            	{% for plot in plots %}
+	            		{
+	            			title: '{{plot.option.title}}', 
+	            			data: {{plot.getJson}},
+	            			options: {{ plot.option |safe}}
+	            		},
+	            		
+	            	{% endfor %}
+	            	];
+	            	
+	            	for (var i = 0; i < plots.length; i++) {
+	            		var plot = plots[i];
+	            		var plotId = "plot" + i;
+	            		
+	            		//$( "#plotContrainer" ).append( "<h3>" + plot.title + "</h3><div id='" + plotId + "'></div>" );
+	            		$( "#plotContrainer" ).append( "<div style='page-break-after:always' id='" + plotId + "'></div>" );
+	            		
+	            		var chart = new google.visualization.ScatterChart(document.getElementById(plotId));
+	            		var data = new google.visualization.DataTable(plot.data, 0.6);
+	            		chart.draw(data, plot.options)
+	            	}
+	         })(grp.jQuery);
         }
+
     </script>
 {% endblock %}
 
@@ -33,7 +57,7 @@
 {% block content %}
    <div class="g-d-c">
          <H1>Tolerance Selection</H1>
-        <div id="chart_div_json"></div>
+        
 		
 		
 		<form action="./" method="post">{% csrf_token %}
@@ -42,12 +66,10 @@
 			</table>
 		<input type="submit" value="Submit" />
 		</form>
+		<div id='plotContrainer'></div>
+		
 		<br />
-        <form method="GET">
-        Nominal size [mm]: <input type="text" name="nominalsize" value={{nominalsize}}><br/>
-        <input type="submit" value="Update graph" />
-        </form><br/><br/>
-
+       
         <pre style="font-family: monospace;">{{ table }}</pre>
         <br />
         {% for measurements_set in measurement_sets%}

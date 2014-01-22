@@ -31,7 +31,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
 #         'm2m' : ['generaltag'],
 #     }
 
-    readonly_fields = ('id','ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
+    readonly_fields = ('id','mean', 'std', 'cpk', 'pcsl', 'ca', 'ca_pcsl', 'cb', 'cp', 'itg', 'itg_pcsl')
     list_display = ('id', 'measurement_report', 'measurement_number', 'target', 'count','specification_type',)
     search_fields = ['id','measurement_report__material__name', 'measurement_report__process__name', 'generaltag__name',]
     list_filter = ['measurement_report', ]
@@ -43,7 +43,7 @@ class MeasurementSetAdmin(admin.ModelAdmin):
         }),
         ('Process capability information', {
             'classes': ('grp-collapse grp-closed',),
-            'fields': ['pcsl', 'ca', 'ca_pcsl', 'cb', 'cp', 'itg','itg_pcsl']
+            'fields': ['mean', 'std', 'pcsl', 'cpk', 'ca', 'ca_pcsl', 'cb', 'cp', 'itg','itg_pcsl']
         }),
     ]
     inlines = (MeasurementInline, )
