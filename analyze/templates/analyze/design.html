@@ -60,12 +60,22 @@
         
 		
 		
-		<form action="./" method="post">{% csrf_token %}
-			<table>
-				{{ form.as_table }}
-			</table>
+		<form method="post" action="./">{% csrf_token %}{{ formset.management_form }}
+		    <table>
+		        <tr>
+		        {% for form in formset %}
+		        	<td>
+			        	<table>
+			        	{{ form }}
+			        	</table>
+		        	</td>
+		        {% endfor %}
+		        </tr>
+		    </table>
 		<input type="submit" value="Submit" />
 		</form>
+		
+		
 		<div id='plotContrainer'></div>
 		
 		<br />
