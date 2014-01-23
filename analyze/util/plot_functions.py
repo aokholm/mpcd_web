@@ -5,23 +5,31 @@ Created on Dec 14, 2013
 '''
 from scipy.stats import norm
 import numpy as np
-from mesdata.PCfunctions import c4stdCorrectionFactor
+from mesdata.PCfunctions import meanStd
 from scipy.special import erfcinv
 
-
 def list2cdf (input_data):
-
     # recieves a list of data, returns a normal distribution fit
 
-    mean_2 = np.mean(input_data)
-    std_2 = np.std(input_data, ddof=1) / c4stdCorrectionFactor(len(input_data))
+    (mean, std) = meanStd(input_data)
 
-    minpos = mean_2 - 3*std_2
-    maxpos = mean_2 + 3*std_2
+    minpos = mean - 3*std
+    maxpos = mean + 3*std
     x = np.linspace(minpos,maxpos,100).tolist()
-    cdf = [norm.cdf(x[i], loc=mean_2, scale=std_2) for i in range(100)]
-
+    cdf = [norm.cdf(x[i], loc=mean, scale=std) for i in range(100)]
     return (x, cdf)
+
+def list2cdfNinety(input_data):
+    # recieves a list of data, returns a normal distribution fit
+    (mean, std) = meanStd(input_data)
+
+    minpos = mean - 3*std
+    maxpos = mean + 3*std
+    x = np.linspace(minpos,maxpos,100).tolist()
+    cdf = [norm.cdf(x[i], loc=mean, scale=std) for i in range(100)]
+    ninety = norm.ppf(0.9, loc=mean, scale=std)
+    
+    return (x, cdf, ninety)
 
 def wilson (cdf,n,alpha):
     

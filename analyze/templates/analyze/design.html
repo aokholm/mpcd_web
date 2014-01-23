@@ -71,9 +71,20 @@
 		        	</td>
 		        {% endfor %}
 		        </tr>
+		        <tr>
+		        	<td>{{designform}}</td>
+		        </td>
 		    </table>
 		<input type="submit" value="Submit" />
 		</form>
+		
+		<table>
+		{% for PCData in PCDatas %}
+			<tr>
+				<td>{{PCData.Title}}</td><td>{{PCData.ITG_90}}</td><td>{{PCData.PCSL}}</td>
+			</tr>
+		{% endfor %}
+		</table>
 		
 		
 		<div id='plotContrainer'></div>

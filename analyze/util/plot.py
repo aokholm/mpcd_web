@@ -4,7 +4,7 @@ Created on Dec 13, 2013
 @author: aokholmRetina
 '''
 import numpy as np
-from analyze.util.plot_functions import list2cdf, wilson
+from analyze.util.plot_functions import list2cdf, list2cdfNinety, wilson
 import gviz_api
 from django.utils.safestring import mark_safe
 
@@ -117,7 +117,7 @@ class Plot(object):
         cumFreq = [(i+1)*(1/float(len(distList)+1)) for i in range(len(distList))]
         self.addDots(sorted_itgrade, cumFreq, sorted_tooltips, **kwargs)
         
-        [xvalue , cdfvalue] = list2cdf(distList)
+        [xvalue , cdfvalue] = list2cdf(distList)        
         if normalFit:
             self.addLine(xvalue, cdfvalue)
         
